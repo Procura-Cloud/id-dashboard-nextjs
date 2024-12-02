@@ -145,6 +145,8 @@ export default function ApprovalPanel() {
   useEffect(() => {
     if (user.role !== "ADMIN") return;
 
+    fecthApprovedSubmissions();
+
     // Set interval to fetch every 5 seconds
     const intervalId = setInterval(() => {
       fecthApprovedSubmissions();
@@ -221,7 +223,10 @@ export default function ApprovalPanel() {
           mode="create"
           applications={selectedRows.map((row) => row.id)}
           isOpen={isSendToVendorOpen}
-          onClose={onSendToVendorClose}
+          onClose={() => {
+            setSelectedRowIds({});
+            onSendToVendorClose();
+          }}
           refresh={fecthApprovedSubmissions}
         />
       )}

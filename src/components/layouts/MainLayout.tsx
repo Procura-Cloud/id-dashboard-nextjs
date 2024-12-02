@@ -2,6 +2,7 @@ import {
   Box,
   Flex,
   Icon,
+  Image,
   Link,
   Spinner,
   Text,
@@ -101,21 +102,14 @@ export default function MainLayout({ children }) {
         position="fixed"
         transition="width 0.2s ease"
       >
-        <Box
-          p={4}
-          display="flex"
-          justifyContent="space-between"
-          alignItems="center"
-        >
-          <Text fontSize="xl" fontWeight="bold" color="teal.500">
-            Brand
-          </Text>
+        <Box p={4} display="flex" justifyContent="center" alignItems="center">
           <CloseIcon
             display={{ base: "block", md: "none" }}
             boxSize={4}
             cursor="pointer"
             onClick={onClose}
           />
+          <Image src={"/assets/niq_logo.png"} alt="niq logo" width={100} />
         </Box>
         <VStack spacing={4} align="stretch" mt={6} px={4}>
           {menuItems.map((item) => (
@@ -128,7 +122,7 @@ export default function MainLayout({ children }) {
               borderRadius="md"
               _hover={{ bg: "teal.100", textDecoration: "none" }}
             >
-              <Icon as={item.icon} boxSize={5} mr={3} color="teal.500" />
+              <Icon as={item.icon} boxSize={5} mr={3} color="blue" />
               <Text fontWeight="medium">{item.name}</Text>
             </Link>
           ))}

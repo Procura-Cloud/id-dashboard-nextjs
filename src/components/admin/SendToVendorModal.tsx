@@ -97,9 +97,9 @@ export default function SendToVendorModal({
                 toast.success("Applications sent to vendor.", {
                   position: "bottom-center",
                 });
+                onClose();
 
                 await refresh();
-                onClose();
               } catch (error) {
                 console.error(error);
                 toast.error("Something went wrong.", {

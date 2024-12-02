@@ -32,7 +32,7 @@ export function AuthProvider({ children }) {
 
       if (response.status === 200) {
         const userData = response.data;
-
+        console.log("User data", userData);
         localStorage.setItem("token", token);
         localStorage.setItem("user", JSON.stringify(userData));
 
