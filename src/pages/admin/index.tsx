@@ -7,6 +7,7 @@ import {
   Button,
   HStack,
   Input,
+  Spinner,
   useDisclosure,
 } from "@chakra-ui/react";
 import { Heading } from "@chakra-ui/react";
@@ -20,11 +21,18 @@ import { toast } from "react-toastify";
 import ListAdminTable from "@/components/admin/ListAdminTable";
 import { useQueryState } from "nuqs";
 import { ChevronRightIcon } from "@chakra-ui/icons";
+import MainLayout from "@/components/layouts/MainLayout";
+import ProtectedRoute from "@/components/common/ProtectedRoute";
+import { useAuth } from "@/context/AuthContext";
+import { useRouter } from "next/router";
 
-export default function Admin() {
+export default function AdminPage() {
   const [admins, setAdmins] = useState<AdminType[]>([]);
   const { isOpen, onClose, onOpen } = useDisclosure();
   const [search, setSearch] = useQueryState("search");
+  const { user, loading } = useAuth();
+
+  const router = useRouter();
 
   const defferedSearch = useDeferredValue(search);
 
@@ -48,52 +56,84 @@ export default function Admin() {
     fetchAdmins();
   }, [defferedSearch]);
 
-  return (
-    <Box paddingTop="2rem">
-      <HStack justifyContent="space-between">
-        <Breadcrumb
-          size="sm"
-          fontSize="sm"
-          spacing="8px"
-          separator={<ChevronRightIcon color="gray.500" />}
-        >
-          <BreadcrumbItem>
-            <BreadcrumbLink href="#">Dashboard</BreadcrumbLink>
-          </BreadcrumbItem>
-          <BreadcrumbItem>
-            <BreadcrumbLink href="/admin">Admins</BreadcrumbLink>
-          </BreadcrumbItem>
-        </Breadcrumb>
+  useEffect(() => {
+    if (!router.isReady) return;
 
-        <Avatar name="Dan Abrahmov" src="https://bit.ly/dan-abramov" />
-      </HStack>
-      <Heading variant="h2" size="lg" mt="4">
-        Admins
-      </Heading>
-      <Text>Create or delete admins here.</Text>
+    if (!user && !loading) {
+      router.push("/login");
+    }
+  }, []);
 
-      <HStack marginTop="2rem" justifyContent={"flex-end"}>
-        <Button leftIcon={<IoMdAdd />} colorScheme="blue" onClick={onOpen}>
-          Add Admin
-        </Button>
-      </HStack>
-
-      <Box marginTop={"1rem"} marginBottom={"2rem"}>
-        <Input
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          placeholder="Search Admins"
+  if (!user || loading) {
+    return (
+      <Box
+        sx={{
+          width: "100vw",
+          height: "100vh",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+        }}
+      >
+        <Spinner
+          thickness="4px"
+          speed="0.65s"
+          emptyColor="gray.200"
+          color="blue.500"
+          size="xl"
         />
       </Box>
+    );
+  }
 
-      <ListAdminTable refresh={fetchAdmins} data={admins} />
+  return (
+    <MainLayout>
+      <Box paddingTop="2rem">
+        <HStack justifyContent="space-between" alignItems="center">
+          <Breadcrumb
+            size="sm"
+            fontSize="sm"
+            spacing="8px"
+            separator={<ChevronRightIcon color="gray.500" />}
+          >
+            <BreadcrumbItem>
+              <BreadcrumbLink href="#">Dashboard</BreadcrumbLink>
+            </BreadcrumbItem>
+            <BreadcrumbItem>
+              <BreadcrumbLink href="/admin">Admins</BreadcrumbLink>
+            </BreadcrumbItem>
+          </Breadcrumb>
 
-      <CreateAdminModal
-        mode="create"
-        isOpen={isOpen}
-        onClose={onClose}
-        refresh={fetchAdmins}
-      />
-    </Box>
+          <Avatar name={user.name} />
+        </HStack>
+        <Heading variant="h2" size="lg" mt="4">
+          Admins
+        </Heading>
+        <Text>Create or delete admins here.</Text>
+
+        <HStack marginTop="2rem" justifyContent={"flex-end"}>
+          <Button leftIcon={<IoMdAdd />} colorScheme="blue" onClick={onOpen}>
+            Add Admin
+          </Button>
+        </HStack>
+
+        <Box marginTop={"1rem"} marginBottom={"2rem"}>
+          <Input
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder="Search Admins"
+          />
+        </Box>
+
+        <ListAdminTable refresh={fetchAdmins} data={admins} />
+
+        <CreateAdminModal
+          mode="create"
+          isOpen={isOpen}
+          onClose={onClose}
+          refresh={fetchAdmins}
+        />
+      </Box>
+    </MainLayout>
   );
 }

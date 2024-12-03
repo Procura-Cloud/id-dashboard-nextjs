@@ -27,6 +27,7 @@ export function AuthProvider({ children }) {
   const router = useRouter();
 
   const verifyToken = async (token: string) => {
+    setLoading(true);
     try {
       const response = await verifyAuthToken(token);
 
@@ -49,6 +50,8 @@ export function AuthProvider({ children }) {
       setToken(null);
 
       return null;
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -76,29 +79,6 @@ export function AuthProvider({ children }) {
       router.push("/login"); // Redirect if no token or user
     }
   }, []);
-
-  if (loading) {
-    // Show a loading spinner or blank screen while verifying token
-    return (
-      <Box
-        style={{
-          width: "100vw",
-          height: "100vh",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-        }}
-      >
-        <Spinner
-          thickness="4px"
-          speed="0.65s"
-          emptyColor="gray.200"
-          color="blue.500"
-          size="xl"
-        />
-      </Box>
-    );
-  }
 
   return (
     <AuthContext.Provider

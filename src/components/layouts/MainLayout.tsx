@@ -42,10 +42,6 @@ export default function MainLayout({ children }) {
     );
   }
 
-  if (!user) {
-    return <Text>User not authenticated.</Text>;
-  }
-
   const adminMenuItems = [
     { name: "Admins", icon: FiHome, path: "/admin" },
     { name: "HR", icon: FiUser, path: "/hr" },

@@ -74,8 +74,12 @@ export default function CompletedPanel() {
     {
       accessorKey: "location",
       header: "Location",
-      accessorFn: (row) =>
-        `${row.location.lineOne}, ${row.location.lineTwo}, ${row.location.contact}`,
+      accessorFn: (row) => {
+        if (row.location)
+          return `${row.location?.lineOne}, ${row.location?.lineTwo}, ${row.location?.contact}`;
+
+        return "-";
+      },
     },
     {
       accessorKey: "vendor.name",

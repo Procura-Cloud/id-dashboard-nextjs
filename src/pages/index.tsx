@@ -1,3 +1,5 @@
+import ProtectedRoute from "@/components/common/ProtectedRoute";
+
 export default function Home() {
-  return <div>Home</div>;
+  return <ProtectedRoute redirectTo="/login">Home</ProtectedRoute>;
 }

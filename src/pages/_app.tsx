@@ -10,42 +10,14 @@ import { AuthProvider } from "@/context/AuthContext";
 export default function App({ Component, pageProps }: AppProps) {
   const router = useRouter();
 
-  const getLayout = () => {
-    if (router.pathname === "/verify") {
-      return (
-        <AuthProvider>
-          <Component {...pageProps} />
-        </AuthProvider>
-      );
-    }
-
-    if (router.pathname.startsWith("/candidate")) {
-      return <Component {...pageProps} />;
-    }
-
-    if (router.pathname === "/login") {
-      return (
-        <AuthProvider>
-          <Component {...pageProps} />
-        </AuthProvider>
-      );
-    }
-
-    return (
-      <AuthProvider>
-        <MainLayout>
-          <Component {...pageProps} />
-        </MainLayout>
-      </AuthProvider>
-    );
-  };
-
   return (
     <ChakraProvider>
-      <NuqsAdapter>
-        {getLayout()}
-        <ToastContainer />
-      </NuqsAdapter>
+      <AuthProvider>
+        <NuqsAdapter>
+          <Component {...pageProps} />
+          <ToastContainer />
+        </NuqsAdapter>
+      </AuthProvider>
     </ChakraProvider>
   );
 }

@@ -107,9 +107,11 @@ export default function AddCandidateModal({
 
       await refresh();
     } catch (error) {
-      toast.error(error?.message ?? "Something went wrong.", {
-        position: "bottom-center",
-      });
+      if (error.response) {
+        toast.error(error.response.data.message, {
+          position: "bottom-center",
+        });
+      }
       console.error(error);
     } finally {
       onClose();

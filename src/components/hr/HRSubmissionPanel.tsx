@@ -261,7 +261,11 @@ export default function HRSubmissionPanel() {
               stage={submission.stage || "-"}
               locationId={submission.locationId}
               vendor={submission.vendor}
-              location={`${submission.location.lineOne}, ${submission.location.lineTwo}, ${submission.location.contact}`}
+              location={
+                submission.location
+                  ? `${submission.location.lineOne}, ${submission.location.lineTwo}, ${submission.location.contact}`
+                  : "-"
+              }
               refresh={fetchSubmissions}
             />
           </>

@@ -97,7 +97,7 @@ export default function ListVendorsTable(props: ListVendorsTableProps) {
                     await deleteVendor(row.id);
 
                     await refresh();
-                    toast.success("Invite email sent successfully.", {
+                    toast.success("Deleted vendor successfully.", {
                       position: "bottom-center",
                     });
                   } catch (error) {

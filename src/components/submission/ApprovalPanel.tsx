@@ -165,7 +165,10 @@ export default function ApprovalPanel() {
           <Tr>
             <Th>
               <Checkbox
-                isChecked={selectedRowCount === table.getRowModel().rows.length}
+                isChecked={
+                  selectedRowCount !== 0 &&
+                  selectedRowCount === table.getRowModel().rows.length
+                }
                 isIndeterminate={
                   selectedRowCount > 0 &&
                   selectedRowCount < table.getRowModel().rows.length

@@ -104,7 +104,12 @@ export default function CreateVendorModal({
                   <FormErrorMessage>{errors.name.message}</FormErrorMessage>
                 )}
               </FormControl>
-              <FormControl isRequired isInvalid={!!errors.email}>
+              <FormControl
+                isReadOnly={mode === "edit"}
+                isDisabled={mode === "edit"}
+                isRequired
+                isInvalid={!!errors.email}
+              >
                 <FormLabel>Vendor Email</FormLabel>
                 <Input placeholder="Vendor Email" {...register("email")} />
                 {errors.email && (

@@ -7,6 +7,7 @@ import {
   Button,
   HStack,
   Input,
+  Spinner,
   useDisclosure,
 } from "@chakra-ui/react";
 import { Heading } from "@chakra-ui/react";
@@ -24,12 +25,16 @@ import { HRType } from "@/schema/hr.schema";
 import { listHRs } from "@/controllers/hr.controller";
 import { ChevronRightIcon } from "@chakra-ui/icons";
 import { useAuth } from "@/context/AuthContext";
+import { useRouter } from "next/router";
+import MainLayout from "@/components/layouts/MainLayout";
 
 export default function HRPage() {
   const [hrs, setHRs] = useState<HRType[]>([]);
   const { isOpen, onClose, onOpen } = useDisclosure();
   const [search, setSearch] = useQueryState("search");
-  const { user } = useAuth();
+  const { user, loading } = useAuth();
+
+  const router = useRouter();
 
   const defferedSearch = useDeferredValue(search);
 
@@ -53,54 +58,86 @@ export default function HRPage() {
     fetchHRs();
   }, [defferedSearch]);
 
-  return (
-    <Box paddingTop="2rem">
-      <HStack justifyContent="space-between">
-        <Breadcrumb
-          size="sm"
-          fontSize="sm"
-          spacing="8px"
-          separator={<ChevronRightIcon color="gray.500" />}
-        >
-          <BreadcrumbItem>
-            <BreadcrumbLink href="#">Dashboard</BreadcrumbLink>
-          </BreadcrumbItem>
-          <BreadcrumbItem>
-            <BreadcrumbLink href="/admin">HRs</BreadcrumbLink>
-          </BreadcrumbItem>
-        </Breadcrumb>
+  useEffect(() => {
+    if (!router.isReady) return;
 
-        <Avatar name={user.name} />
-      </HStack>
-      <Heading variant="h2" size="lg">
-        HRs
-      </Heading>
-      <Text>Create or delete Human Resource Managers here.</Text>
+    if (!user && !loading) {
+      router.push("/login");
+    }
+  }, []);
 
-      {user.role === "ADMIN" && (
-        <HStack marginTop="2rem" justifyContent={"flex-end"}>
-          <Button leftIcon={<IoMdAdd />} colorScheme="blue" onClick={onOpen}>
-            Add HR
-          </Button>
-        </HStack>
-      )}
-
-      <Box marginTop={"1rem"} marginBottom={"2rem"}>
-        <Input
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          placeholder="Search HRs"
+  if (!user || loading) {
+    return (
+      <Box
+        sx={{
+          width: "100vw",
+          height: "100vh",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+        }}
+      >
+        <Spinner
+          thickness="4px"
+          speed="0.65s"
+          emptyColor="gray.200"
+          color="blue.500"
+          size="xl"
         />
       </Box>
+    );
+  }
 
-      <ListHRTable refresh={fetchHRs} data={hrs} />
+  return (
+    <MainLayout>
+      <Box paddingTop="2rem">
+        <HStack justifyContent="space-between">
+          <Breadcrumb
+            size="sm"
+            fontSize="sm"
+            spacing="8px"
+            separator={<ChevronRightIcon color="gray.500" />}
+          >
+            <BreadcrumbItem>
+              <BreadcrumbLink href="#">Dashboard</BreadcrumbLink>
+            </BreadcrumbItem>
+            <BreadcrumbItem>
+              <BreadcrumbLink href="/admin">HRs</BreadcrumbLink>
+            </BreadcrumbItem>
+          </Breadcrumb>
 
-      <CreateHRModal
-        mode="create"
-        isOpen={isOpen}
-        onClose={onClose}
-        refresh={fetchHRs}
-      />
-    </Box>
+          <Avatar name={user.name} />
+        </HStack>
+        <Heading variant="h2" size="lg">
+          HRs
+        </Heading>
+        <Text>Create or delete Human Resource Managers here.</Text>
+
+        {user.role === "ADMIN" && (
+          <HStack marginTop="2rem" justifyContent={"flex-end"}>
+            <Button leftIcon={<IoMdAdd />} colorScheme="blue" onClick={onOpen}>
+              Add HR
+            </Button>
+          </HStack>
+        )}
+
+        <Box marginTop={"1rem"} marginBottom={"2rem"}>
+          <Input
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder="Search HRs"
+          />
+        </Box>
+
+        <ListHRTable refresh={fetchHRs} data={hrs} />
+
+        <CreateHRModal
+          mode="create"
+          isOpen={isOpen}
+          onClose={onClose}
+          refresh={fetchHRs}
+        />
+      </Box>
+    </MainLayout>
   );
 }

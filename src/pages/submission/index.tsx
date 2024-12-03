@@ -22,20 +22,23 @@ import ApprovalPanel from "@/components/submission/ApprovalPanel";
 import AssignedPanel from "@/components/submission/AssignedPanel";
 import CompletedPanel from "@/components/submission/CompletedPanel";
 import { useRouter } from "next/router";
+import MainLayout from "@/components/layouts/MainLayout";
 
 export default function SubmissionPage() {
   const { isOpen, onClose, onOpen } = useDisclosure();
   const router = useRouter();
 
-  const { user, token, loading } = useAuth();
+  const { user, loading } = useAuth();
 
   useEffect(() => {
-    if (router.isReady && !token) {
+    if (!router.isReady) return;
+
+    if (!user && !loading) {
       router.push("/login");
     }
   }, []);
 
-  if (loading) {
+  if (loading || !user) {
     return (
       <Box
         sx={{
@@ -58,55 +61,57 @@ export default function SubmissionPage() {
   }
 
   return (
-    <Box paddingTop="2rem">
-      <Heading variant="h2" size="lg">
-        Submission
-      </Heading>
-      <Text>Create, edit, or delete submissions here.</Text>
+    <MainLayout>
+      <Box paddingTop="2rem">
+        <Heading variant="h2" size="lg">
+          Submission
+        </Heading>
+        <Text>Create, edit, or delete submissions here.</Text>
 
-      <HStack marginTop="2rem" justifyContent={"flex-end"}>
-        {(user.role === "ADMIN" || user.role === "HR") && (
-          <Button leftIcon={<IoMdAdd />} colorScheme="blue" onClick={onOpen}>
-            Add Candidate
-          </Button>
-        )}
-      </HStack>
-
-      <Tabs>
-        <TabList>
+        <HStack marginTop="2rem" justifyContent={"flex-end"}>
           {(user.role === "ADMIN" || user.role === "HR") && (
-            <Tab>Submissions</Tab>
+            <Button leftIcon={<IoMdAdd />} colorScheme="blue" onClick={onOpen}>
+              Add Candidate
+            </Button>
           )}
-          {user.role === "ADMIN" && <Tab>Approvals</Tab>}
-          {user.role === "VENDOR" && <Tab>Assigned</Tab>}
-          {user.role === "ADMIN" && <Tab>Completed</Tab>}
-        </TabList>
+        </HStack>
 
-        <TabPanels>
-          {(user.role === "ADMIN" || user.role === "HR") && (
-            <TabPanel>
-              <HRSumbmissionPanel />
-            </TabPanel>
-          )}
-          {user.role === "ADMIN" && (
-            <TabPanel>
-              <ApprovalPanel />
-            </TabPanel>
-          )}
-          {user.role === "VENDOR" && (
-            <TabPanel>
-              <AssignedPanel />
-            </TabPanel>
-          )}
-          {user.role === "ADMIN" && (
-            <TabPanel>
-              <CompletedPanel />
-            </TabPanel>
-          )}
-        </TabPanels>
-      </Tabs>
+        <Tabs>
+          <TabList>
+            {(user.role === "ADMIN" || user.role === "HR") && (
+              <Tab>Submissions</Tab>
+            )}
+            {user.role === "ADMIN" && <Tab>Approvals</Tab>}
+            {user.role === "VENDOR" && <Tab>Assigned</Tab>}
+            {user.role === "ADMIN" && <Tab>Completed</Tab>}
+          </TabList>
 
-      <AddCandidateModal mode="create" isOpen={isOpen} onClose={onClose} />
-    </Box>
+          <TabPanels>
+            {(user.role === "ADMIN" || user.role === "HR") && (
+              <TabPanel>
+                <HRSumbmissionPanel />
+              </TabPanel>
+            )}
+            {user.role === "ADMIN" && (
+              <TabPanel>
+                <ApprovalPanel />
+              </TabPanel>
+            )}
+            {user.role === "VENDOR" && (
+              <TabPanel>
+                <AssignedPanel />
+              </TabPanel>
+            )}
+            {user.role === "ADMIN" && (
+              <TabPanel>
+                <CompletedPanel />
+              </TabPanel>
+            )}
+          </TabPanels>
+        </Tabs>
+
+        <AddCandidateModal mode="create" isOpen={isOpen} onClose={onClose} />
+      </Box>
+    </MainLayout>
   );
 }
