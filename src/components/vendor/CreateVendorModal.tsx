@@ -48,13 +48,14 @@ export default function CreateVendorModal({
       email: data?.email ?? "",
       phoneNumber: data?.phoneNumber ?? "",
     },
+    mode: "onChange",
     resolver: zodResolver(vendorSchema),
   });
 
   const onSubmit = async (data: VendorType) => {
     try {
       if (mode === "create") {
-        const response = await createVendor({
+        await createVendor({
           name: data.name,
           email: data.email,
           phoneNumber: data.phoneNumber,
@@ -66,7 +67,7 @@ export default function CreateVendorModal({
       }
 
       if (mode === "edit") {
-        const response = await updateVendor(data.id, {
+        await updateVendor(data.id, {
           name: data.name,
           email: data.email,
           phoneNumber: data.phoneNumber,

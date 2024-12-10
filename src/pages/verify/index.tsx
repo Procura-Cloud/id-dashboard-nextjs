@@ -6,43 +6,15 @@ import { toast } from "react-toastify";
 
 export default function VerifyPage() {
   const router = useRouter();
-  const { verifyToken } = useAuth();
-
-  const login = async (token) => {
-    const userData: {
-      id: string;
-      email: string;
-      role: "ADMIN" | "HR" | "VENDOR";
-    } = await verifyToken(token);
-
-    switch (userData.role) {
-      case "ADMIN": {
-        router.push("/admin");
-        break;
-      }
-      case "HR": {
-        router.push("/hr");
-        break;
-      }
-      case "VENDOR": {
-        router.push("/vendor");
-        break;
-      }
-    }
-  };
+  const { login, loading, user } = useAuth();
 
   useEffect(() => {
     const token = router.query.token as string;
 
     if (!router.isReady) return;
 
-    if (!token) {
-      toast.error("Invalid token.", {
-        position: "bottom-center",
-      });
-
+    if (!loading && !user) {
       router.push("/login");
-      return;
     }
 
     login(token);

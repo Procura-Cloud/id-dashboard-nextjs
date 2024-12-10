@@ -1,44 +1,32 @@
 import { useState } from "react";
 
-export const usePagination = ({ initialPage = 1, limit = 10 }) => {
-  const [page, setPage] = useState(initialPage);
-  const [data, setData] = useState<any>(null);
+const usePagination = (initialPage: number, totalPages: number) => {
+  const [currentPage, setCurrentPage] = useState(initialPage);
 
-  const getPaginationParams = () => {
-    return {
-      page,
-      limit,
-    };
+  const setPage = (page: number) => {
+    if (page >= 1 && page <= totalPages) {
+      setCurrentPage(page);
+    }
   };
 
-  const handleResponse = (data) => {
-    setData(data);
-    setPage(data.page);
+  const goToPreviousPage = () => {
+    if (currentPage > 1) {
+      setCurrentPage(currentPage - 1);
+    }
+  };
+
+  const goToNextPage = () => {
+    if (currentPage < totalPages) {
+      setCurrentPage(currentPage + 1);
+    }
   };
 
   return {
-    page,
-    limit,
-    results: data?.results,
-    totalCount: data?.totalCount,
-    totalPages: data?.totalPages,
-    hasNext: data?.hasNext,
-    hasData: data != null,
-    handleResponse,
+    currentPage,
+    goToPreviousPage,
+    goToNextPage,
     setPage,
-    getPaginationParams,
   };
 };
 
-export interface PaginationProps {
-  page: number;
-  limit: number;
-  results: any[];
-  totalCount: number;
-  totalPages: number;
-  hasNext: boolean;
-  hasData: boolean;
-  handleResponse: (data: any) => void;
-  setPage: (page: number) => void;
-  getPaginationParams: () => { page: number; limit: number };
-}
+export default usePagination;

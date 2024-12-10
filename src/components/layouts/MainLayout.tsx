@@ -51,9 +51,7 @@ export default function MainLayout({ children }) {
   ];
 
   const hrMenuItems = [
-    { name: "HR", icon: FiUser, path: "/hr" },
     { name: "Submissions", icon: FiSettings, path: "/submission" },
-    { name: "Locations", icon: TfiLocationPin, path: "/location" },
   ];
 
   const vendorMenuItems = [

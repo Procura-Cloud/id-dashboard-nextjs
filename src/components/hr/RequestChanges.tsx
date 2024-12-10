@@ -33,7 +33,7 @@ import { useState } from "react";
 import { useAuth } from "@/context/AuthContext";
 
 export interface RequestChangesModalProps {
-  id: string;
+  id: number;
   isOpen: boolean;
   onClose: () => void;
   refresh: () => Promise<void>;

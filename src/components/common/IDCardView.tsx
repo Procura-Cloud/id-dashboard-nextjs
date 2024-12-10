@@ -37,6 +37,7 @@ import { locationSchema, LocationType } from "@/schema/location.schema";
 import { createLocation } from "@/controllers/location.controller";
 import { submitForm } from "@/controllers/candidate.controller";
 import { useRouter } from "next/router";
+import ViewModal from "../submission/ViewModal";
 
 export interface ImagePickerModalProps {
   isOpen: boolean;
@@ -147,6 +148,13 @@ export default function IDCardView({
   token: string;
 }) {
   const { isOpen, onOpen, onClose } = useDisclosure();
+
+  const {
+    isOpen: isViewOpen,
+    onOpen: onViewOpen,
+    onClose: onViewClose,
+  } = useDisclosure();
+
   const [image, setImage] = useState<File | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
@@ -194,7 +202,7 @@ export default function IDCardView({
         position: "bottom-center",
       });
 
-      router.push("/candidate/success");
+      router.push("/candidate/success?id=" + data.id);
     } catch (error) {
       toast.error(error?.message ?? "Something went wrong.", {
         position: "bottom-center",
@@ -240,28 +248,20 @@ export default function IDCardView({
           </FormControl>
 
           <FormControl isReadOnly>
-            <FormLabel>Email</FormLabel>
-            <Input placeholder="Email" value={data.email} />
-          </FormControl>
-
-          <FormControl isReadOnly>
-            <FormLabel>Employee ID</FormLabel>
-            <Input placeholder="Employee ID" value={data.employeeID || "-"} />
-          </FormControl>
-
-          <FormControl isReadOnly>
             <FormLabel>Location</FormLabel>
-            <Input placeholder="Location" value={data.location as string} />
+            <Input placeholder="Location" value={data.location?.slug ?? "-"} />
           </FormControl>
 
-          <Button
-            colorScheme="blue"
-            sx={{ width: "100%" }}
-            isLoading={isLoading}
-            onClick={handleSubmit}
-          >
-            Save
-          </Button>
+          <VStack width="100%">
+            <Button
+              colorScheme="blue"
+              sx={{ width: "100%" }}
+              isLoading={isLoading}
+              onClick={handleSubmit}
+            >
+              Save
+            </Button>
+          </VStack>
         </VStack>
       </Box>
 
@@ -270,6 +270,8 @@ export default function IDCardView({
         isOpen={isOpen}
         onClose={onClose}
       />
+
+      <ViewModal data={data} isOpen={isViewOpen} onClose={onViewClose} />
     </Box>
   );
 }

@@ -27,6 +27,7 @@ import {
   updateCandidate,
 } from "@/controllers/candidate.controller";
 import { suggestLocations } from "@/controllers/location.controller";
+import { useEffect } from "react";
 
 export interface AddCandidateModalProps {
   mode: "create" | "edit";
@@ -42,22 +43,15 @@ export default function AddCandidateModal({
   isOpen,
   data = {},
   onClose,
-
   refresh = async () => {},
 }: AddCandidateModalProps) {
   const {
     register,
     control,
+    reset,
     handleSubmit,
     formState: { errors, isSubmitting, isValid },
   } = useForm<CandidateType>({
-    defaultValues: {
-      id: data.id,
-      name: data.name,
-      email: data.email,
-      employeeID: data.employeeID,
-      location: data.location,
-    },
     resolver: zodResolver(candidateSchema),
   });
 
@@ -83,8 +77,8 @@ export default function AddCandidateModal({
         const response = await createCandidate({
           name: data.name,
           email: data.email,
-          employeeID: data.employeeID,
-          locationID: data.location.value,
+          photoUrl: data.photoUrl,
+          locationID: data.location?.value,
         });
 
         toast.success("Candidate created successfully.", {
@@ -93,6 +87,7 @@ export default function AddCandidateModal({
       }
 
       if (mode === "edit") {
+        console.log(data);
         const response = await updateCandidate(data.id, {
           name: data.name,
           email: data.email,
@@ -118,9 +113,15 @@ export default function AddCandidateModal({
     }
   };
 
-  const handleSelect = (selectedOption) => {
-    console.log("Selected:", selectedOption);
-  };
+  useEffect(() => {
+    reset({
+      id: data.id,
+      name: data.name,
+      email: data.email,
+      employeeID: data.employeeID,
+      location: data.location,
+    });
+  }, []);
 
   return (
     <Modal isOpen={isOpen} onClose={onClose}>
@@ -181,7 +182,7 @@ export default function AddCandidateModal({
 
           <ModalFooter>
             <Button
-              isDisabled={!isValid || isSubmitting}
+              isDisabled={!isValid}
               isLoading={isSubmitting}
               colorScheme="blue"
               type="submit"

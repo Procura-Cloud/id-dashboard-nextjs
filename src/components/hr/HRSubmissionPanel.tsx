@@ -20,15 +20,15 @@ import {
 import { useQueryState } from "nuqs";
 import { use, useDeferredValue, useEffect, useState } from "react";
 import { toast } from "react-toastify";
-import { FaCamera, FaEdit } from "react-icons/fa";
+import { FaCamera, FaEdit, FaEye } from "react-icons/fa";
 import { FaComment } from "react-icons/fa6";
 import { TiTick } from "react-icons/ti";
 import AddCandidateModal from "./AddCandidateModal";
 import RequestChangesModal from "./RequestChanges";
-import { usePagination } from "@/hooks/Pagination";
 import PaginationRow from "../common/PaginationRow";
 import NoResults from "../common/NoResults";
 import { useAuth } from "@/context/AuthContext";
+import ViewModal from "../submission/ViewModal";
 
 export function SubmissionCard({
   id,
@@ -43,12 +43,15 @@ export function SubmissionCard({
   locationId,
   vendor,
 }: {
-  id: string;
+  id: number;
   src: string;
   name: string;
   employeeID: string;
   email: string;
-  location: string;
+  location?: {
+    value: string;
+    label: string;
+  };
   locationId: string;
   status: string;
   stage: string;
@@ -65,6 +68,12 @@ export function SubmissionCard({
     isOpen: isRequestChangesOpen,
     onOpen: onRequestChangesOpen,
     onClose: onRequestChangesClose,
+  } = useDisclosure();
+
+  const {
+    isOpen: isViewCardOpen,
+    onOpen: onViewCardOpen,
+    onClose: onViewCardClose,
   } = useDisclosure();
 
   const { user } = useAuth();
@@ -123,7 +132,7 @@ export function SubmissionCard({
 
           <Text mt="2">Employee ID: {employeeID}</Text>
           <Text>Email: {email}</Text>
-          <Text>Location: {location}</Text>
+          <Text>Location: {location.label}</Text>
           <Text>
             Status:
             <Tag ml="2" color="teal" colorScheme="teal">
@@ -131,7 +140,10 @@ export function SubmissionCard({
             </Tag>
           </Text>
           <Text>
-            Stage: {stage === "VENDOR" ? `${vendor.name} (VENDOR)` : stage}
+            Stage:{" "}
+            {stage === "VENDOR"
+              ? `${vendor.name ? vendor.name : "-"} (VENDOR)`
+              : stage}
           </Text>
         </CardBody>
 
@@ -158,6 +170,18 @@ export function SubmissionCard({
                 Request Changes
               </Button>
             )}
+
+          {src && (
+            <Button
+              leftIcon={<FaEye />}
+              variant="solid"
+              colorScheme="blue"
+              onClick={onViewCardOpen}
+            >
+              View Card
+            </Button>
+          )}
+
           {(user.role === "ADMIN" || user.role === "HR") && stage === "HR" && (
             <Button
               leftIcon={<TiTick />}
@@ -178,10 +202,7 @@ export function SubmissionCard({
           name,
           email,
           employeeID,
-          location: {
-            value: locationId,
-            label: location,
-          },
+          location,
         }}
         isOpen={isEditOpen}
         onClose={onEditClose}
@@ -194,6 +215,12 @@ export function SubmissionCard({
         onClose={onRequestChangesClose}
         refresh={refresh}
       />
+
+      <ViewModal
+        data={{ id }}
+        isOpen={isViewCardOpen}
+        onClose={onViewCardClose}
+      />
     </Card>
   );
 }
@@ -203,10 +230,6 @@ export default function HRSubmissionPanel() {
   const { isOpen, onClose, onOpen } = useDisclosure();
   const [search, setSearch] = useQueryState("search");
   const { user } = useAuth();
-  const paginationInstance = usePagination({
-    initialPage: 1,
-    limit: 10,
-  });
 
   const defferedSearch = useDeferredValue(search);
 
@@ -237,7 +260,6 @@ export default function HRSubmissionPanel() {
   }, []);
   return (
     <>
-      <PaginationRow instance={paginationInstance} type="small" />
       <Input
         value={search}
         onChange={(e) => setSearch(e.target.value)}
@@ -260,11 +282,12 @@ export default function HRSubmissionPanel() {
               email={submission.email}
               stage={submission.stage || "-"}
               locationId={submission.locationId}
-              vendor={submission.vendor}
+              vendor={submission.vendor ? submission.vendor.name : "-"}
               location={
-                submission.location
-                  ? `${submission.location.lineOne}, ${submission.location.lineTwo}, ${submission.location.contact}`
-                  : "-"
+                submission.location && {
+                  value: submission.location.id,
+                  label: submission.location.slug,
+                }
               }
               refresh={fetchSubmissions}
             />

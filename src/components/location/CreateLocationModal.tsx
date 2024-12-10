@@ -14,7 +14,6 @@ import {
   Input,
   FormErrorMessage,
   VStack,
-  ButtonGroup,
 } from "@chakra-ui/react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "react-toastify";
@@ -52,6 +51,7 @@ export default function CreateLocationModal({
     formState: { errors, isSubmitting, isValid },
   } = useForm<LocationType>({
     defaultValues: {
+      slug: data?.slug ?? "",
       lineOne: data?.lineOne ?? "",
       lineTwo: data?.lineTwo ?? "",
       lineThree: data?.lineThree ?? "",
@@ -65,6 +65,7 @@ export default function CreateLocationModal({
     try {
       if (mode === "create") {
         const response = await createLocation({
+          slug: data.slug,
           lineOne: data.lineOne,
           lineTwo: data.lineTwo,
           lineThree: data.lineThree,
@@ -110,6 +111,13 @@ export default function CreateLocationModal({
           <ModalCloseButton />
           <ModalBody>
             <VStack spacing={6}>
+              <FormControl isRequired isInvalid={!!errors.slug}>
+                <FormLabel>Slug</FormLabel>
+                <Input placeholder="Slug" {...register("slug")} />
+                {errors.slug && (
+                  <FormErrorMessage>{errors.slug.message}</FormErrorMessage>
+                )}
+              </FormControl>
               <FormControl isRequired isInvalid={!!errors.lineOne}>
                 <FormLabel>Line One</FormLabel>
                 <Input placeholder="Line One" {...register("lineOne")} />

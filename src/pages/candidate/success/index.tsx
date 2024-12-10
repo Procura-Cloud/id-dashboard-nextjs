@@ -1,14 +1,23 @@
 // pages/success.js
-import { Box, Text, Button, Center, Icon } from "@chakra-ui/react";
+import {
+  Box,
+  Text,
+  Button,
+  Center,
+  Icon,
+  VStack,
+  useDisclosure,
+} from "@chakra-ui/react";
 import { CheckCircleIcon } from "@chakra-ui/icons";
 import { useRouter } from "next/router";
+import { useQueryState } from "nuqs";
+import ViewModal from "@/components/submission/ViewModal";
 
 export default function SuccessPage() {
   const router = useRouter();
+  const [id, setId] = useQueryState("id");
 
-  const handleGoBack = () => {
-    router.push("/"); // Navigate back to the home page or wherever you want
-  };
+  const { isOpen, onOpen, onClose } = useDisclosure();
 
   return (
     <Center height="100vh" bg="gray.50">
@@ -27,12 +36,18 @@ export default function SuccessPage() {
         </Text>
         <Text color="gray.600" mb={6}>
           Thank you for submitting your application. We will review it and get
-          back to you soon.
+          back to you soon. You can now close this tab.
         </Text>
-        <Button colorScheme="teal" onClick={handleGoBack}>
-          Go Back
-        </Button>
+        <VStack>
+          {id && (
+            <Button colorScheme="teal" onClick={onOpen}>
+              View ID Card
+            </Button>
+          )}
+        </VStack>
       </Box>
+
+      <ViewModal data={{ id }} isOpen={isOpen} onClose={onClose} />
     </Center>
   );
 }

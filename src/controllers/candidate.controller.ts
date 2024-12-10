@@ -13,7 +13,7 @@ export const listSumbmissions = async (options = {}) => {
   return response.data;
 };
 
-export const updateCandidate = async (id: string, data) => {
+export const updateCandidate = async (id: string | number, data) => {
   const response = await axiosClient.patch(`/candidate/update/${id}`, data);
 
   return response.data;

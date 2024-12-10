@@ -17,6 +17,7 @@ import {
   Tabs,
   VStack,
   Text,
+  Spinner,
 } from "@chakra-ui/react";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
@@ -26,7 +27,7 @@ export default function Login() {
   const [email, setEmail] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
-  const { user } = useAuth();
+  const { user, loading } = useAuth();
 
   const handleSubmit = async (userType) => {
     setIsLoading(true);
@@ -85,12 +86,34 @@ export default function Login() {
           break;
         }
         case "VENDOR": {
-          router.push("/vendor");
+          router.push("/submission");
           break;
         }
       }
     }
   }, [user]);
+
+  if (loading && !user) {
+    return (
+      <Box
+        sx={{
+          width: "100vw",
+          height: "100vh",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+        }}
+      >
+        <Spinner
+          thickness="4px"
+          speed="0.65s"
+          emptyColor="gray.200"
+          color="blue.500"
+          size="xl"
+        />
+      </Box>
+    );
+  }
 
   return (
     <Center minH="100vh" bgGradient="linear(to-br, teal.500, blue.500)">

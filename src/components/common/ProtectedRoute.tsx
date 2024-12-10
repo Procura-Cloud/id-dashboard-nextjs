@@ -1,50 +1,48 @@
-import { useAuth } from "@/context/AuthContext";
-import { Box, Spinner } from "@chakra-ui/react";
-import { useRouter } from "next/router";
-import { useEffect, useLayoutEffect } from "react";
+import React from "react";
+import { Box, Button, Text, HStack } from "@chakra-ui/react";
 
-export interface ProtectedRouteProps {
-  redirectTo?: string;
-  children: React.ReactNode;
+interface PaginationProps {
+  currentPage: number;
+  totalPages: number;
+  onPageChange: (page: number) => void;
 }
 
-export default function ProtectedRoute({
-  redirectTo = "/login",
-  children,
-}: ProtectedRouteProps) {
-  const { user, loading } = useAuth();
-  const router = useRouter();
+const Pagination: React.FC<PaginationProps> = ({
+  currentPage,
+  totalPages,
+  onPageChange,
+}) => {
+  const handlePrevPage = () => {
+    if (currentPage > 1) onPageChange(currentPage - 1);
+  };
 
-  useLayoutEffect(() => {
-    if (!router.isReady) return;
+  const handleNextPage = () => {
+    if (currentPage < totalPages) onPageChange(currentPage + 1);
+  };
 
-    if (!user && !loading) {
-      router.push(redirectTo);
-    }
-  }, [user, loading, router]);
-
-  if (loading || !user) {
-    // Show a loading spinner or blank screen while verifying token
-    return (
-      <Box
-        style={{
-          width: "100vw",
-          height: "100vh",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-        }}
+  return (
+    <HStack spacing={4} justify="center" py={4}>
+      <Button
+        onClick={handlePrevPage}
+        isDisabled={currentPage === 1}
+        colorScheme="teal"
       >
-        <Spinner
-          thickness="4px"
-          speed="0.65s"
-          emptyColor="gray.200"
-          color="blue.500"
-          size="xl"
-        />
-      </Box>
-    );
-  }
+        Previous
+      </Button>
 
-  return <>{children}</>;
-}
+      <Text>
+        Page {currentPage} of {totalPages}
+      </Text>
+
+      <Button
+        onClick={handleNextPage}
+        isDisabled={currentPage === totalPages}
+        colorScheme="teal"
+      >
+        Next
+      </Button>
+    </HStack>
+  );
+};
+
+export default Pagination;

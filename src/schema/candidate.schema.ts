@@ -1,7 +1,7 @@
 import { z } from "zod";
 
 export const candidateSchema = z.object({
-  id: z.string().uuid().optional(),
+  id: z.number().optional(),
   name: z.string().min(1, "Name is required."),
   email: z.string().email(),
   photoUrl: z.string().optional(),
@@ -15,11 +15,10 @@ export const candidateSchema = z.object({
     .object({
       value: z.string(),
       label: z.string(),
+      slug: z.string().optional().nullable(),
     })
     .nullable()
-    .refine((val) => val !== null, {
-      message: "This field is required",
-    }),
+    .optional(),
 });
 
 export type CandidateType = z.infer<typeof candidateSchema>;

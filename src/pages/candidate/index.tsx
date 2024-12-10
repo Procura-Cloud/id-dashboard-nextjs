@@ -5,7 +5,7 @@ import {
   verifyCandidate,
 } from "@/controllers/candidate.controller";
 import { CandidateType } from "@/schema/candidate.schema";
-import { Box, Heading, Text } from "@chakra-ui/react";
+import { Alert, AlertIcon, Box, Heading, Text } from "@chakra-ui/react";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
 import { toast } from "react-toastify";
@@ -70,6 +70,11 @@ export default function CandidatePage() {
       >
         <Heading>Complete your profile</Heading>
         <Text>Complete your ID Application card here.</Text>
+
+        <Alert status="info" my="4">
+          <AlertIcon />
+          Instructions:
+        </Alert>
 
         {router.isReady && (
           <IDCardView data={data} token={router.query.token as string} />

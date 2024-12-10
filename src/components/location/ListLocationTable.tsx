@@ -27,22 +27,13 @@ export default function ListLocationTable(props: ListLocationTableProps) {
 
   const columns: GenericTableColumn[] = [
     {
-      headerName: "ID",
-      field: "id",
-      renderer: (row) => {
-        const value = row.id;
-        return (
-          <Tooltip label={value}>{`${value.slice(0, 3)}...${value.slice(
-            -3
-          )}`}</Tooltip>
-        );
-      },
+      headerName: "Slug",
+      field: "slug",
     },
     {
       headerName: "Line One",
       field: "lineOne",
     },
-
     {
       headerName: "Line Two",
       field: "lineTwo",

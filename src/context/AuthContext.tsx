@@ -13,6 +13,7 @@ export interface AuthContextType {
   user: any; // Replace with your user type/interface
   token: string | null;
   loading: boolean;
+  login: (token: string) => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType>({} as AuthContextType);
@@ -25,6 +26,10 @@ export function AuthProvider({ children }) {
   const [loading, setLoading] = useState(true); // Loading state to prevent flickering
 
   const router = useRouter();
+
+  const login = async (token: string) => {
+    return await verifyToken(token);
+  };
 
   const verifyToken = async (token: string) => {
     setLoading(true);
@@ -86,6 +91,7 @@ export function AuthProvider({ children }) {
         verifyToken,
         user,
         token,
+        login,
         loading,
       }}
     >
