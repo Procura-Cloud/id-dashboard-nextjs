@@ -41,7 +41,7 @@ export default function ViewModal({ data, isOpen, onClose }: ViewModalProps) {
             type="application/pdf"
             width="100%"
             height="100%"
-            src={`${process.env.NEXT_PUBLIC_API_URL}/candidate/view/${data.id}`}
+            src={`${process.env.NEXT_PUBLIC_API_URL}candidate/view/${data.id}`}
           />
         </ModalBody>
       </ModalContent>
