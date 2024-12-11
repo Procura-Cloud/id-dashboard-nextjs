@@ -146,7 +146,7 @@ export default function AssignedPanel() {
 
   const fecthApprovedSubmissions = async () => {
     try {
-      const data = await getAssignedCandidates(user.id);
+      const data = await getAssignedCandidates();
       setAssignedSubmissions(data);
     } catch (error) {
       console.error(error);

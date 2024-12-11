@@ -8,13 +8,12 @@ import {
 } from "@chakra-ui/react";
 import { FiChevronLeft, FiChevronRight } from "react-icons/fi";
 import { useEffect, useState } from "react";
-import { PaginationProps } from "@/hooks/Pagination";
 
 export default function PaginationRow({
   instance,
   type,
 }: {
-  instance: PaginationProps;
+  instance: any;
   type?: string;
 }) {
   const { page, totalPages, hasNext, setPage, hasData, limit, totalCount } =
