@@ -23,6 +23,7 @@ import { TfiLocationPin, TfiShoppingCart } from "react-icons/tfi";
 import { useAuth } from "@/context/AuthContext";
 import { CiShop } from "react-icons/ci";
 import { useState } from "react";
+import { FaPerson } from "react-icons/fa6";
 
 export default function MainLayout({ children }) {
   const { isOpen, onOpen, onClose } = useDisclosure();
@@ -63,6 +64,7 @@ export default function MainLayout({ children }) {
         { name: "Assigned Submissions", path: "/admin/submissions/assigned" },
       ],
     },
+    { name: "HR", icon: FaPerson, path: "/admin/hr" },
     { name: "Locations", icon: TfiLocationPin, path: "/location" },
     { name: "Vendors", icon: TfiShoppingCart, path: "/vendor" },
   ];

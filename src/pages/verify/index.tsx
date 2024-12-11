@@ -17,6 +17,22 @@ export default function VerifyPage() {
       router.push("/login");
     }
 
+    if (user) {
+      switch (user.role) {
+        case "ADMIN": {
+          router.push("/admin");
+          break;
+        }
+        case "HR": {
+          router.push("/hr/submissions");
+          break;
+        }
+        case "VENDOR": {
+          router.push("/vendor/submissions");
+          break;
+        }
+      }
+    }
     login(token);
   }, [router.query]); // Add dependency to ensure it re-runs when `token` is available
 
