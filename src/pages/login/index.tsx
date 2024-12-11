@@ -82,11 +82,11 @@ export default function Login() {
           break;
         }
         case "HR": {
-          router.push("/hr");
+          router.push("/hr/submissions");
           break;
         }
         case "VENDOR": {
-          router.push("/submission");
+          router.push("/vendor/submissions");
           break;
         }
       }

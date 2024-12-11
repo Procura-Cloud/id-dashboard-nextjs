@@ -31,6 +31,7 @@ import { useEffect } from "react";
 
 export interface AddCandidateModalProps {
   mode: "create" | "edit";
+  title?: string;
   data?: CandidateType;
   isOpen: boolean;
   onClose: () => void;
@@ -40,6 +41,7 @@ export interface AddCandidateModalProps {
 
 export default function AddCandidateModal({
   mode = "create",
+  title = "Create New Application",
   isOpen,
   data = {},
   onClose,
@@ -75,6 +77,7 @@ export default function AddCandidateModal({
     try {
       if (mode === "create") {
         const response = await createCandidate({
+          type: data.type,
           name: data.name,
           email: data.email,
           photoUrl: data.photoUrl,
@@ -116,6 +119,7 @@ export default function AddCandidateModal({
   useEffect(() => {
     reset({
       id: data.id,
+      type: data.type,
       name: data.name,
       email: data.email,
       employeeID: data.employeeID,
@@ -128,9 +132,7 @@ export default function AddCandidateModal({
       <ModalOverlay />
       <ModalContent>
         <form onSubmit={handleSubmit(onSubmit)}>
-          <ModalHeader>
-            {mode === "create" ? "Create" : "Edit"} Candidate
-          </ModalHeader>
+          <ModalHeader>{title}</ModalHeader>
           <ModalCloseButton />
           <ModalBody>
             <VStack spacing={6}>

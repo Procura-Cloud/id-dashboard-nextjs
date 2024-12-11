@@ -14,7 +14,6 @@ import {
   Input,
   FormErrorMessage,
   VStack,
-  ButtonGroup,
 } from "@chakra-ui/react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "react-toastify";
@@ -40,6 +39,7 @@ export default function CreateVendorModal({
   const {
     register,
     handleSubmit,
+    reset,
     formState: { errors, isSubmitting, isValid },
   } = useForm<VendorType>({
     defaultValues: {
@@ -47,6 +47,8 @@ export default function CreateVendorModal({
       name: data?.name ?? "",
       email: data?.email ?? "",
       phoneNumber: data?.phoneNumber ?? "",
+      city: data?.city ?? "",
+      state: data?.state ?? "",
     },
     mode: "onChange",
     resolver: zodResolver(vendorSchema),
@@ -59,6 +61,8 @@ export default function CreateVendorModal({
           name: data.name,
           email: data.email,
           phoneNumber: data.phoneNumber,
+          city: data.city,
+          state: data.state,
         });
 
         toast.success("Admin created successfully.", {
@@ -79,6 +83,7 @@ export default function CreateVendorModal({
       }
 
       await refresh();
+      reset();
     } catch (error) {
       toast.error(error?.message ?? "Something went wrong.", {
         position: "bottom-center",
@@ -127,6 +132,21 @@ export default function CreateVendorModal({
                   <FormErrorMessage>
                     {errors.phoneNumber.message}
                   </FormErrorMessage>
+                )}
+              </FormControl>
+
+              <FormControl isInvalid={!!errors.state}>
+                <FormLabel>State</FormLabel>
+                <Input placeholder="State" {...register("state")} />
+                {errors.state && (
+                  <FormErrorMessage>{errors.state.message}</FormErrorMessage>
+                )}
+              </FormControl>
+              <FormControl isInvalid={!!errors.city}>
+                <FormLabel>City</FormLabel>
+                <Input placeholder="City" {...register("city")} />
+                {errors.city && (
+                  <FormErrorMessage>{errors.city.message}</FormErrorMessage>
                 )}
               </FormControl>
             </VStack>

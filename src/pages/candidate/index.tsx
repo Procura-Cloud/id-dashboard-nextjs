@@ -5,7 +5,15 @@ import {
   verifyCandidate,
 } from "@/controllers/candidate.controller";
 import { CandidateType } from "@/schema/candidate.schema";
-import { Alert, AlertIcon, Box, Heading, Text } from "@chakra-ui/react";
+import {
+  Alert,
+  AlertIcon,
+  Box,
+  Heading,
+  ListItem,
+  OrderedList,
+  Text,
+} from "@chakra-ui/react";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
 import { toast } from "react-toastify";
@@ -68,12 +76,46 @@ export default function CandidatePage() {
           borderRadius: "1rem",
         }}
       >
-        <Heading>Complete your profile</Heading>
+        <Heading>Complete your profile {JSON.stringify(data)}</Heading>
         <Text>Complete your ID Application card here.</Text>
 
-        <Alert status="info" my="4">
+        <Alert status="info" my="4" alignItems="flex-start" borderRadius="1rem">
           <AlertIcon />
-          Instructions:
+          <div>
+            <strong>Instructions</strong>
+            <OrderedList>
+              <ListItem>Format: JPEG.</ListItem>
+              <ListItem>Size: File size should not exceed 15 MB.</ListItem>
+              <ListItem>
+                Background: Plain white or ListItemght-coloured background.
+              </ListItem>
+              <ListItem>
+                ListItemghting: Ensure your face is clearly visible with no
+                shadows or glare.
+              </ListItem>
+              <ListItem>
+                Framing:
+                <OrderedList>
+                  <ListItem>
+                    The photo should include your full face, neck, and
+                    shoulders.
+                  </ListItem>
+                  <ListItem>
+                    Your face should be centred and occupy about 70-80% of the
+                    frame.
+                  </ListItem>
+                </OrderedList>
+              </ListItem>
+              <ListItem>
+                Dress Code: Professional or business casual attire.
+              </ListItem>
+              <ListItem>
+                Expression: Neutral or friendly expression. Avoid sunglasses,
+                hats, or anything that obstructs your face unless required for
+                ListItemgious or medical reasons.
+              </ListItem>
+            </OrderedList>
+          </div>
         </Alert>
 
         {router.isReady && (

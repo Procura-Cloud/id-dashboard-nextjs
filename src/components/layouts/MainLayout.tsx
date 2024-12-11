@@ -8,17 +8,26 @@ import {
   Text,
   VStack,
   useDisclosure,
+  Collapse,
 } from "@chakra-ui/react";
-import { FiHome, FiUser, FiSettings, FiMenu } from "react-icons/fi";
+import {
+  FiHome,
+  FiUser,
+  FiSettings,
+  FiMenu,
+  FiChevronDown,
+  FiChevronUp,
+} from "react-icons/fi";
 import { CloseIcon } from "@chakra-ui/icons";
-import { TfiLocationPin } from "react-icons/tfi";
+import { TfiLocationPin, TfiShoppingCart } from "react-icons/tfi";
 import { useAuth } from "@/context/AuthContext";
 import { CiShop } from "react-icons/ci";
-import { useRouter } from "next/router";
+import { useState } from "react";
 
 export default function MainLayout({ children }) {
   const { isOpen, onOpen, onClose } = useDisclosure();
   const { user, loading } = useAuth();
+  const [submissionsOpen, setSubmissionsOpen] = useState(false);
 
   if (loading) {
     return (
@@ -44,26 +53,34 @@ export default function MainLayout({ children }) {
 
   const adminMenuItems = [
     { name: "Admins", icon: FiHome, path: "/admin" },
-    { name: "HR", icon: FiUser, path: "/hr" },
-    { name: "Submissions", icon: FiSettings, path: "/submission" },
+    {
+      name: "Submissions",
+      icon: FiSettings,
+      path: "/admin/submissions",
+      submenu: [
+        { name: "All Submissions", path: "/admin/submissions" },
+        { name: "Approve Submissions", path: "/admin/submissions/approve" },
+        { name: "Assigned Submissions", path: "/admin/submissions/assigned" },
+      ],
+    },
     { name: "Locations", icon: TfiLocationPin, path: "/location" },
-    { name: "Vendors", icon: CiShop, path: "/vendor" },
+    { name: "Vendors", icon: TfiShoppingCart, path: "/vendor" },
   ];
 
   const hrMenuItems = [
-    { name: "Submissions", icon: FiSettings, path: "/submission" },
+    {
+      name: "Submissions",
+      icon: FiSettings,
+      path: "/hr/submissions",
+      submenu: [],
+    },
   ];
 
   const vendorMenuItems = [
-    { name: "Submissions", icon: FiSettings, path: "/submission" },
+    { name: "Submissions", icon: FiSettings, path: "/vendor/submissions" },
   ];
 
-  const menuItems =
-    user.role === "ADMIN"
-      ? adminMenuItems
-      : user.role === "HR"
-      ? hrMenuItems
-      : vendorMenuItems;
+  const toggleSubmenu = () => setSubmissionsOpen(!submissionsOpen);
 
   return (
     <Flex h="100vh" bg="gray.100">
@@ -106,20 +123,120 @@ export default function MainLayout({ children }) {
           <Image src={"/assets/niq_logo.png"} alt="niq logo" width={100} />
         </Box>
         <VStack spacing={4} align="stretch" mt={6} px={4}>
-          {menuItems.map((item) => (
-            <Link
-              href={item.path}
-              key={item.name}
-              display="flex"
-              alignItems="center"
-              p={3}
-              borderRadius="md"
-              _hover={{ bg: "teal.100", textDecoration: "none" }}
-            >
-              <Icon as={item.icon} boxSize={5} mr={3} color="blue" />
-              <Text fontWeight="medium">{item.name}</Text>
-            </Link>
-          ))}
+          {/* Admin Menu */}
+          {user.role === "ADMIN" && (
+            <>
+              {adminMenuItems.map((item) => (
+                <Box key={item.name}>
+                  <Link
+                    href={!item.submenu ? item.path : undefined}
+                    display="flex"
+                    alignItems="center"
+                    p={3}
+                    borderRadius="md"
+                    _hover={{ bg: "teal.100", textDecoration: "none" }}
+                    onClick={item.submenu ? toggleSubmenu : undefined}
+                  >
+                    <Icon as={item.icon} boxSize={5} mr={3} color="blue" />
+                    <Text fontWeight="medium">{item.name}</Text>
+                    {item.submenu && (
+                      <Icon
+                        as={submissionsOpen ? FiChevronUp : FiChevronDown}
+                        ml="auto"
+                        boxSize={4}
+                      />
+                    )}
+                  </Link>
+                  {item.submenu && (
+                    <Collapse in={submissionsOpen} animateOpacity>
+                      <VStack spacing={2} align="stretch" pl={6} mt={2}>
+                        {item.submenu.map((submenu) => (
+                          <Link
+                            href={submenu.path}
+                            key={submenu.name}
+                            p={2}
+                            borderRadius="md"
+                            _hover={{ bg: "gray.100", textDecoration: "none" }}
+                          >
+                            <Text fontSize="sm">{submenu.name}</Text>
+                          </Link>
+                        ))}
+                      </VStack>
+                    </Collapse>
+                  )}
+                </Box>
+              ))}
+            </>
+          )}
+
+          {/* HR Menu */}
+          {user.role === "HR" && (
+            <>
+              {hrMenuItems.map((item) => (
+                <Box key={item.name}>
+                  <Link
+                    href={!item.submenu ? item.path : undefined}
+                    display="flex"
+                    alignItems="center"
+                    p={3}
+                    borderRadius="md"
+                    _hover={{ bg: "teal.100", textDecoration: "none" }}
+                    onClick={
+                      item.submenu.length > 0 ? toggleSubmenu : undefined
+                    }
+                  >
+                    <Icon as={item.icon} boxSize={5} mr={3} color="blue" />
+                    <Text fontWeight="medium">{item.name}</Text>
+                    {item.submenu.length > 0 && (
+                      <Icon
+                        as={submissionsOpen ? FiChevronUp : FiChevronDown}
+                        ml="auto"
+                        boxSize={4}
+                      />
+                    )}
+                  </Link>
+                  {item.submenu.length > 0 && (
+                    <Collapse in={submissionsOpen} animateOpacity>
+                      <VStack spacing={2} align="stretch" pl={6} mt={2}>
+                        {item.submenu.map((submenu) => (
+                          <Link
+                            href={submenu.path}
+                            key={submenu.name}
+                            p={2}
+                            borderRadius="md"
+                            _hover={{ bg: "gray.100", textDecoration: "none" }}
+                          >
+                            <Text fontSize="sm">{submenu.name}</Text>
+                          </Link>
+                        ))}
+                      </VStack>
+                    </Collapse>
+                  )}
+                </Box>
+              ))}
+            </>
+          )}
+
+          {/* Vendor Menu */}
+          {user.role === "VENDOR" && (
+            <>
+              {vendorMenuItems.map((item) => (
+                <Box key={item.name}>
+                  <Link
+                    href={item.path}
+                    display="flex"
+                    alignItems="center"
+                    p={3}
+                    borderRadius="md"
+                    _hover={{ bg: "teal.100", textDecoration: "none" }}
+                  >
+                    <Icon as={item.icon} boxSize={5} mr={3} color="blue" />
+                    <Text fontWeight="medium">{item.name}</Text>
+                  </Link>
+                </Box>
+              ))}
+            </>
+          )}
         </VStack>
       </Box>
 

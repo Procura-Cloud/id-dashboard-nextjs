@@ -1,48 +1,50 @@
-import React from "react";
-import { Box, Button, Text, HStack } from "@chakra-ui/react";
+import { useAuth } from "@/context/AuthContext";
+import { Box, Spinner } from "@chakra-ui/react";
+import { useRouter } from "next/router";
+import { useEffect, useLayoutEffect } from "react";
 
-interface PaginationProps {
-  currentPage: number;
-  totalPages: number;
-  onPageChange: (page: number) => void;
+export interface ProtectedRouteProps {
+  redirectTo?: string;
+  children: React.ReactNode;
 }
 
-const Pagination: React.FC<PaginationProps> = ({
-  currentPage,
-  totalPages,
-  onPageChange,
-}) => {
-  const handlePrevPage = () => {
-    if (currentPage > 1) onPageChange(currentPage - 1);
-  };
+export default function ProtectedRoute({
+  redirectTo = "/login",
+  children,
+}: ProtectedRouteProps) {
+  const { user, loading } = useAuth();
+  const router = useRouter();
 
-  const handleNextPage = () => {
-    if (currentPage < totalPages) onPageChange(currentPage + 1);
-  };
+  useLayoutEffect(() => {
+    if (!router.isReady) return;
 
-  return (
-    <HStack spacing={4} justify="center" py={4}>
-      <Button
-        onClick={handlePrevPage}
-        isDisabled={currentPage === 1}
-        colorScheme="teal"
+    if (!user && !loading) {
+      router.push(redirectTo);
+    }
+  }, [user, loading, router]);
+
+  if (loading || !user) {
+    // Show a loading spinner or blank screen while verifying token
+    return (
+      <Box
+        style={{
+          width: "100vw",
+          height: "100vh",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+        }}
       >
-        Previous
-      </Button>
+        <Spinner
+          thickness="4px"
+          speed="0.65s"
+          emptyColor="gray.200"
+          color="blue.500"
+          size="xl"
+        />
+      </Box>
+    );
+  }
 
-      <Text>
-        Page {currentPage} of {totalPages}
-      </Text>
-
-      <Button
-        onClick={handleNextPage}
-        isDisabled={currentPage === totalPages}
-        colorScheme="teal"
-      >
-        Next
-      </Button>
-    </HStack>
-  );
-};
-
-export default Pagination;
+  return <>{children}</>;
+}

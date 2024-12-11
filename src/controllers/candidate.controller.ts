@@ -19,6 +19,12 @@ export const updateCandidate = async (id: string | number, data) => {
   return response.data;
 };
 
+export const getAllAssignedCandidates = async () => {
+  const response = await axiosClient.get("/candidate/assigned-candidates");
+
+  return response.data;
+};
+
 export const getCandidateForm = async (id: string) => {
   const response = await axiosClient.get(`/candidate/${id}`);
 
@@ -51,14 +57,17 @@ export const submitForm = async (
   {
     token,
     photo,
+    employeeID,
   }: {
     token: string;
     photo: File;
+    employeeID?: string;
   }
 ) => {
   const formData = new FormData();
 
   formData.append("token", token);
+  formData.append("employeeID", employeeID);
   formData.append("profileImage", photo);
 
   const response = await axiosClient.post(

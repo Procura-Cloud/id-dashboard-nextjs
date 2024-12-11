@@ -33,7 +33,16 @@ import AddCandidateModal from "@/components/hr/AddCandidateModal";
 
 export default function AdminSubmissionsPage() {
   const [submissions, setSubmissions] = useState([]);
-  const { isOpen, onClose, onOpen } = useDisclosure();
+  const {
+    isOpen: isAddCandidateOpen,
+    onClose: onAddCandidateClose,
+    onOpen: onAddCandidateOpen,
+  } = useDisclosure();
+  const {
+    isOpen: isLostAndFoundOpen,
+    onClose: onLostAndFoundClose,
+    onOpen: onLostAndFoundOpen,
+  } = useDisclosure();
   const [search, setSearch] = useQueryState("search");
   const { user, loading } = useAuth();
 
@@ -122,8 +131,22 @@ export default function AdminSubmissionsPage() {
 
         <HStack marginTop="2rem" justifyContent={"flex-end"}>
           {(user.role === "ADMIN" || user.role === "HR") && (
-            <Button leftIcon={<IoMdAdd />} colorScheme="blue" onClick={onOpen}>
+            <Button
+              leftIcon={<IoMdAdd />}
+              colorScheme="blue"
+              onClick={onAddCandidateOpen}
+            >
               Add Candidate
+            </Button>
+          )}
+
+          {user.role === "ADMIN" && (
+            <Button
+              leftIcon={<IoMdAdd />}
+              colorScheme="blue"
+              onClick={onLostAndFoundOpen}
+            >
+              Lost and Found Application
             </Button>
           )}
         </HStack>
@@ -166,7 +189,21 @@ export default function AdminSubmissionsPage() {
         </Box>
       </Box>
 
-      <AddCandidateModal mode="create" isOpen={isOpen} onClose={onClose} />
+      <AddCandidateModal
+        mode="create"
+        title="Create New Application"
+        isOpen={isAddCandidateOpen}
+        onClose={onAddCandidateClose}
+      />
+      <AddCandidateModal
+        mode="create"
+        title="Create Lost and Found Application"
+        data={{
+          type: "LOST_AND_FOUND",
+        }}
+        isOpen={isLostAndFoundOpen}
+        onClose={onLostAndFoundClose}
+      />
     </MainLayout>
   );
 }

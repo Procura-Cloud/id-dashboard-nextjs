@@ -32,8 +32,8 @@ export const listVendors = async (options = {}) => {
   return response.data;
 };
 
-export const getAssignedCandidates = async (id: string) => {
-  const response = await axiosClient.get(`/vendor/assigned-candidates/${id}`);
+export const getAssignedCandidates = async () => {
+  const response = await axiosClient.get(`/vendor/assigned-candidates`);
 
   return response.data;
 };

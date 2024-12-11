@@ -157,6 +157,7 @@ export default function IDCardView({
 
   const [image, setImage] = useState<File | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [employeeID, setEmployeeID] = useState("");
   const router = useRouter();
 
   // Convert remote URL to File
@@ -196,6 +197,7 @@ export default function IDCardView({
       const response = await submitForm(data.id, {
         token: token,
         photo: image,
+        employeeID: employeeID,
       });
 
       toast.success("ID Application submitted successfully.", {
@@ -246,6 +248,17 @@ export default function IDCardView({
             <FormLabel>Name</FormLabel>
             <Input placeholder="Name" value={data.name} />
           </FormControl>
+
+          {data.type === "LOST_AND_FOUND" && (
+            <FormControl>
+              <FormLabel>Employee ID</FormLabel>
+              <Input
+                placeholder="Employee ID"
+                value={employeeID}
+                onChange={(e) => setEmployeeID(e.target.value)}
+              />
+            </FormControl>
+          )}
 
           <FormControl isReadOnly>
             <FormLabel>Location</FormLabel>

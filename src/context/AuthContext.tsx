@@ -74,14 +74,12 @@ export function AuthProvider({ children }) {
           toast.error("Token expired. Please login again.", {
             position: "bottom-center",
           });
-          router.push("/login"); // Redirect to login on failure
         } finally {
           setLoading(false);
         }
       })();
     } else {
       setLoading(false);
-      router.push("/login"); // Redirect if no token or user
     }
   }, []);
 

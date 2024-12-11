@@ -6,6 +6,7 @@ import {
   BreadcrumbLink,
   Button,
   HStack,
+  IconButton,
   Input,
   Spinner,
   useDisclosure,
@@ -23,7 +24,7 @@ import CreateHRModal from "@/components/hr/CreateHRModal";
 import ListHRTable from "@/components/hr/ListHRTable";
 import { HRType } from "@/schema/hr.schema";
 import { listHRs } from "@/controllers/hr.controller";
-import { ChevronRightIcon } from "@chakra-ui/icons";
+import { ChevronLeftIcon, ChevronRightIcon } from "@chakra-ui/icons";
 import { useAuth } from "@/context/AuthContext";
 import { useRouter } from "next/router";
 import MainLayout from "@/components/layouts/MainLayout";
@@ -75,6 +76,8 @@ export default function HRPage() {
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
+          padding: 0,
+          margin: 0,
         }}
       >
         <Spinner
@@ -128,6 +131,24 @@ export default function HRPage() {
             placeholder="Search HRs"
           />
         </Box>
+
+        {/* <HStack justifyContent="space-between" pl="2" my="2">
+          <Box>
+            <Text fontSize="md">Showing 1 to 10 of 100 results</Text>
+          </Box>
+
+          <HStack>
+            <IconButton
+              aria-label="Search database"
+              icon={<ChevronLeftIcon />}
+            />
+            <Text fontSize="small">1</Text>
+            <IconButton
+              aria-label="Search database"
+              icon={<ChevronRightIcon />}
+            />
+          </HStack>
+        </HStack> */}
 
         <ListHRTable refresh={fetchHRs} data={hrs} />
 

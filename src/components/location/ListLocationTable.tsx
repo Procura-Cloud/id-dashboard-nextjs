@@ -27,7 +27,7 @@ export default function ListLocationTable(props: ListLocationTableProps) {
 
   const columns: GenericTableColumn[] = [
     {
-      headerName: "Slug",
+      headerName: "Office Name",
       field: "slug",
     },
     {

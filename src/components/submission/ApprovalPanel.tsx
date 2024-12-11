@@ -30,6 +30,7 @@ import ReactPDF from "@react-pdf/renderer";
 import { MyDocument } from "@/template/IDCard";
 import SendToVendorModal from "../admin/SendToVendorModal";
 import { useAuth } from "@/context/AuthContext";
+import AddCandidateModal from "../hr/AddCandidateModal";
 
 const data = [
   { id: 1, name: "John Doe", email: "john@example.com" },
@@ -50,6 +51,12 @@ export default function ApprovalPanel() {
     isOpen: isSendToVendorOpen,
     onOpen: onSendToVendorOpen,
     onClose: onSendToVendorClose,
+  } = useDisclosure();
+
+  const {
+    isOpen: isEditOpen,
+    onOpen: onEditOpen,
+    onClose: onEditClose,
   } = useDisclosure();
 
   const columns = [
@@ -84,7 +91,14 @@ export default function ApprovalPanel() {
               View
             </MenuItem>
             <MenuItem>Delete</MenuItem>
-            <MenuItem>Edit</MenuItem>
+            <MenuItem
+              onClick={() => {
+                setSelectedIdCard(row.original);
+                onEditOpen();
+              }}
+            >
+              Edit
+            </MenuItem>
           </MenuList>
         </Menu>
       ),
@@ -231,6 +245,16 @@ export default function ApprovalPanel() {
             onSendToVendorClose();
           }}
           refresh={fecthApprovedSubmissions}
+        />
+      )}
+
+      {selectedIdCard && (
+        <AddCandidateModal
+          mode="edit"
+          data={selectedIdCard}
+          refresh={fecthApprovedSubmissions}
+          isOpen={isEditOpen}
+          onClose={onEditClose}
         />
       )}
     </Box>

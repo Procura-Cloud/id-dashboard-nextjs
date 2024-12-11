@@ -112,8 +112,8 @@ export default function CreateLocationModal({
           <ModalBody>
             <VStack spacing={6}>
               <FormControl isRequired isInvalid={!!errors.slug}>
-                <FormLabel>Slug</FormLabel>
-                <Input placeholder="Slug" {...register("slug")} />
+                <FormLabel>Office Name</FormLabel>
+                <Input placeholder="Office Name" {...register("slug")} />
                 {errors.slug && (
                   <FormErrorMessage>{errors.slug.message}</FormErrorMessage>
                 )}

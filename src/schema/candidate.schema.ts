@@ -2,6 +2,7 @@ import { z } from "zod";
 
 export const candidateSchema = z.object({
   id: z.number().optional(),
+  type: z.string().default("NEW_APPLICATION"),
   name: z.string().min(1, "Name is required."),
   email: z.string().email(),
   photoUrl: z.string().optional(),
@@ -15,6 +16,7 @@ export const candidateSchema = z.object({
     .object({
       value: z.string(),
       label: z.string(),
+      id: z.string().optional().nullable(),
       slug: z.string().optional().nullable(),
     })
     .nullable()
