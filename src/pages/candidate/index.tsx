@@ -76,7 +76,7 @@ export default function CandidatePage() {
           borderRadius: "1rem",
         }}
       >
-        <Heading>Complete your profile {JSON.stringify(data)}</Heading>
+        <Heading>Complete your profile</Heading>
         <Text>Complete your ID Application card here.</Text>
 
         <Alert status="info" my="4" alignItems="flex-start" borderRadius="1rem">
