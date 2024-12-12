@@ -142,8 +142,8 @@ export default function CreateLocationModal({
                 )}
               </FormControl>
               <FormControl isRequired isInvalid={!!errors.contact}>
-                <FormLabel>Contact</FormLabel>
-                <Input placeholder="Contact" {...register("contact")} />
+                <FormLabel>Line Four</FormLabel>
+                <Input placeholder="Line Four" {...register("contact")} />
                 {errors.contact && (
                   <FormErrorMessage>{errors.contact.message}</FormErrorMessage>
                 )}
