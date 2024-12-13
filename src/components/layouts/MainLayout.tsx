@@ -9,6 +9,18 @@ import {
   VStack,
   useDisclosure,
   Collapse,
+  Container,
+  HStack,
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  Avatar,
+  Heading,
+  Menu,
+  MenuButton,
+  MenuList,
+  MenuItem,
+  Button,
 } from "@chakra-ui/react";
 import {
   FiHome,
@@ -18,39 +30,27 @@ import {
   FiChevronDown,
   FiChevronUp,
 } from "react-icons/fi";
-import { CloseIcon } from "@chakra-ui/icons";
+import { ChevronDownIcon, ChevronRightIcon, CloseIcon } from "@chakra-ui/icons";
 import { TfiLocationPin, TfiShoppingCart } from "react-icons/tfi";
 import { useAuth } from "@/context/AuthContext";
-import { CiShop } from "react-icons/ci";
 import { useState } from "react";
 import { FaPerson } from "react-icons/fa6";
+import Head from "next/head";
 
-export default function MainLayout({ children }) {
+export default function MainLayout({
+  title,
+  content,
+  children,
+  path = [],
+}: {
+  title: string;
+  content: string;
+  path: string[];
+  children: React.ReactNode;
+}) {
   const { isOpen, onOpen, onClose } = useDisclosure();
-  const { user, loading } = useAuth();
+  const { user, logout } = useAuth();
   const [submissionsOpen, setSubmissionsOpen] = useState(false);
-
-  if (loading) {
-    return (
-      <Box
-        sx={{
-          width: "100vw",
-          height: "100vh",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-        }}
-      >
-        <Spinner
-          thickness="4px"
-          speed="0.65s"
-          emptyColor="gray.200"
-          color="blue.500"
-          size="xl"
-        />
-      </Box>
-    );
-  }
 
   const adminMenuItems = [
     { name: "Admins", icon: FiHome, path: "/admin" },
@@ -65,8 +65,8 @@ export default function MainLayout({ children }) {
       ],
     },
     { name: "HR", icon: FaPerson, path: "/admin/hr" },
-    { name: "Locations", icon: TfiLocationPin, path: "/location" },
-    { name: "Vendors", icon: TfiShoppingCart, path: "/vendor" },
+    { name: "Locations", icon: TfiLocationPin, path: "/admin/location" },
+    { name: "Vendors", icon: TfiShoppingCart, path: "/admin/vendor" },
   ];
 
   const hrMenuItems = [
@@ -79,13 +79,27 @@ export default function MainLayout({ children }) {
   ];
 
   const vendorMenuItems = [
-    { name: "Submissions", icon: FiSettings, path: "/vendor/submissions" },
+    {
+      name: "Submissions",
+      icon: FiSettings,
+      path: "/vendor/submissions",
+      submenu: [
+        { name: "Assigned Submissions", path: "/vendor/submissions/assigned" },
+        {
+          name: "Completed Submissions",
+          path: "/vendor/submissions/completed",
+        },
+      ],
+    },
   ];
 
   const toggleSubmenu = () => setSubmissionsOpen(!submissionsOpen);
 
   return (
-    <Flex h="100vh" bg="gray.100">
+    <Flex minHeight="100vh" width="100%">
+      <Head>
+        <title>{title}</title>
+      </Head>
       {/* Mobile Toggle Button */}
       <Box
         display={{ base: isOpen ? "none" : "block", md: "none" }}
@@ -107,13 +121,14 @@ export default function MainLayout({ children }) {
       <Box
         as="nav"
         w={{ base: isOpen ? "full" : 0, md: "250px" }}
-        h="100vh"
+        minHeight="100vh"
         bg="white"
         boxShadow="xl"
         zIndex="overlay"
         overflowX="hidden"
-        position="fixed"
+        position={{ sm: "fixed", md: "relative" }}
         transition="width 0.2s ease"
+        borderRight="0.01px solid #b4b6b3"
       >
         <Box p={4} display="flex" justifyContent="center" alignItems="center">
           <CloseIcon
@@ -225,16 +240,43 @@ export default function MainLayout({ children }) {
               {vendorMenuItems.map((item) => (
                 <Box key={item.name}>
                   <Link
-                    href={item.path}
+                    href={!item.submenu ? item.path : undefined}
                     display="flex"
                     alignItems="center"
                     p={3}
                     borderRadius="md"
                     _hover={{ bg: "teal.100", textDecoration: "none" }}
+                    onClick={
+                      item.submenu.length > 0 ? toggleSubmenu : undefined
+                    }
                   >
                     <Icon as={item.icon} boxSize={5} mr={3} color="blue" />
                     <Text fontWeight="medium">{item.name}</Text>
+                    {item.submenu.length > 0 && (
+                      <Icon
+                        as={submissionsOpen ? FiChevronUp : FiChevronDown}
+                        ml="auto"
+                        boxSize={4}
+                      />
+                    )}
                   </Link>
+                  {item.submenu.length > 0 && (
+                    <Collapse in={submissionsOpen} animateOpacity>
+                      <VStack spacing={2} align="stretch" pl={6} mt={2}>
+                        {item.submenu.map((submenu) => (
+                          <Link
+                            href={submenu.path}
+                            key={submenu.name}
+                            p={2}
+                            borderRadius="md"
+                            _hover={{ bg: "gray.100", textDecoration: "none" }}
+                          >
+                            <Text fontSize="sm">{submenu.name}</Text>
+                          </Link>
+                        ))}
+                      </VStack>
+                    </Collapse>
+                  )}
                 </Box>
               ))}
             </>
@@ -243,8 +285,42 @@ export default function MainLayout({ children }) {
       </Box>
 
       {/* Main Content */}
-      <Box ml={{ md: "250px" }} w="full" p={6} bg="gray.50">
-        <Text fontSize="lg">{children}</Text>
+      <Box px="8" flex="1" mt="4">
+        <HStack justifyContent="space-between" alignItems="center">
+          <Breadcrumb
+            size="sm"
+            fontSize="sm"
+            spacing="8px"
+            separator={<ChevronRightIcon color="gray.500" />}
+          >
+            {path.map((p) => (
+              <BreadcrumbItem>
+                <BreadcrumbLink href="#" key={p}>
+                  {p}
+                </BreadcrumbLink>
+              </BreadcrumbItem>
+            ))}
+          </Breadcrumb>
+
+          <Menu>
+            <MenuButton
+              as={Button}
+              height="fit-content"
+              p="2"
+              rightIcon={<ChevronDownIcon />}
+            >
+              <Avatar name={user.name} />
+            </MenuButton>
+            <MenuList>
+              <MenuItem onClick={logout}>Sign Out</MenuItem>
+            </MenuList>
+          </Menu>
+        </HStack>
+        <Heading variant="h2" size="lg" mt="4">
+          {title}
+        </Heading>
+        <Text>{content}</Text>
+        {children}
       </Box>
     </Flex>
   );

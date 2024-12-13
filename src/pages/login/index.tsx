@@ -27,7 +27,7 @@ export default function Login() {
   const [email, setEmail] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
-  const { user, loading } = useAuth();
+  const { user, isLoading: authLoading } = useAuth();
 
   const handleSubmit = async (userType) => {
     setIsLoading(true);
@@ -75,6 +75,8 @@ export default function Login() {
   };
 
   useEffect(() => {
+    if (!router.isReady || authLoading) return;
+
     if (user) {
       switch (user.role) {
         case "ADMIN": {
@@ -92,28 +94,6 @@ export default function Login() {
       }
     }
   }, [user]);
-
-  if (loading && !user) {
-    return (
-      <Box
-        sx={{
-          width: "100vw",
-          height: "100vh",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-        }}
-      >
-        <Spinner
-          thickness="4px"
-          speed="0.65s"
-          emptyColor="gray.200"
-          color="blue.500"
-          size="xl"
-        />
-      </Box>
-    );
-  }
 
   return (
     <Center minH="100vh" bgGradient="linear(to-br, teal.500, blue.500)">
@@ -153,7 +133,7 @@ export default function Login() {
                       size="lg"
                       width="full"
                       _hover={{ bg: "teal.600" }}
-                      isLoading={isLoading}
+                      isLoading={authLoading}
                     >
                       Send Magic Link
                     </Button>

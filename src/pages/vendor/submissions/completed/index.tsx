@@ -1,9 +1,8 @@
-import React, { useEffect, useState } from "react";
+import React, { use, useEffect, useState } from "react";
 import {
   useReactTable,
   getCoreRowModel,
   flexRender,
-  ColumnDef,
 } from "@tanstack/react-table";
 import {
   Table,
@@ -21,42 +20,44 @@ import {
   MenuList,
   MenuItem,
   useDisclosure,
-  Spinner,
   HStack,
-  Breadcrumb,
-  BreadcrumbItem,
-  BreadcrumbLink,
-  Avatar,
-  Flex,
+  Heading,
+  Text,
+  Spinner,
 } from "@chakra-ui/react";
-import {
-  getApprovedCandidates,
-  rejectCandidate,
-} from "@/controllers/candidate.controller";
 import { toast } from "react-toastify";
-import { ChevronDownIcon, ChevronRightIcon } from "@chakra-ui/icons";
+import { ChevronDownIcon } from "@chakra-ui/icons";
 import { FaEye } from "react-icons/fa";
 import ReactPDF from "@react-pdf/renderer";
 import { MyDocument } from "@/template/IDCard";
+import {
+  downloadAndMarkDone,
+  downloadCard,
+  downloadCards,
+  getAssignedCandidates,
+  getAssignedCompletedSubmissions,
+  markCompleted,
+} from "@/controllers/vendor.controller";
 import { useAuth } from "@/context/AuthContext";
+import { IoMdCheckmark, IoMdDownload, IoMdEye } from "react-icons/io";
+import { Action, actionsRenderer } from "@/components/common/GenericTable";
 import ViewModal from "@/components/submission/ViewModal";
 import SendToVendorModal from "@/components/admin/SendToVendorModal";
-import { useRouter } from "next/router";
 import MainLayout from "@/components/layouts/MainLayout";
-import { CandidateType } from "@/schema/candidate.schema";
-import AddCandidateModal from "@/components/hr/AddCandidateModal";
+import { getAllAssignedCandidates } from "@/controllers/candidate.controller";
+import { IoIosSend } from "react-icons/io";
+import { useRouter } from "next/router";
 import withProtection from "@/components/common/ProtectedRoute";
 
-export function AdminArrpovalPage() {
-  const [approvedSubmissions, setApprovedSubmissions] = useState([]);
-  const [total, setTotal] = useState(0);
+function CompletedSubmissionsPage() {
+  const [assignedSubmissions, setAssignedSubmissions] = useState([]);
   const [selectedRowIds, setSelectedRowIds] = useState({});
+  const { user, isLoading } = useAuth();
+  const router = useRouter();
 
   const [selectedIdCard, setSelectedIdCard] = useState(null);
 
   const { isOpen, onOpen, onClose } = useDisclosure();
-  const router = useRouter();
-  const { user, isLoading } = useAuth();
 
   const {
     isOpen: isSendToVendorOpen,
@@ -65,12 +66,12 @@ export function AdminArrpovalPage() {
   } = useDisclosure();
 
   const {
-    isOpen: isEditOpen,
-    onOpen: onEditOpen,
-    onClose: onEditClose,
+    isOpen: isViewOpen,
+    onOpen: onViewOpen,
+    onClose: onViewClose,
   } = useDisclosure();
 
-  const columns: ColumnDef<CandidateType>[] = [
+  const columns = [
     {
       accessorKey: "name",
       header: "Name",
@@ -79,69 +80,36 @@ export function AdminArrpovalPage() {
       accessorKey: "email",
       header: "Email",
     },
-    {
-      accessorKey: "employeeID",
-      header: "Employee Code",
-    },
+    { accessorKey: "employeeID", header: "Employee Code" },
+    { accessorKey: "status", header: "Status" },
     { accessorKey: "location.slug", header: "Location" },
     {
       id: "actions", // Custom column for actions
       header: "Actions",
-      cell: ({ row }) => (
-        <Menu>
-          <MenuButton
-            as={IconButton}
-            icon={<ChevronDownIcon />}
-            variant="outline"
-          />
-          <MenuList>
-            <MenuItem
-              onClick={() => {
+      cell: ({ row }) => {
+        const actions: Action[] = [];
+
+        actions.push(
+          ...[
+            {
+              label: "View",
+              icon: <IoMdEye />,
+              onClick: () => {
+                console.log(row.original);
                 setSelectedIdCard(row.original);
-                onOpen();
-              }}
-            >
-              View
-            </MenuItem>
+                onViewOpen();
+              },
+            },
+            {
+              label: "Download",
+              icon: <IoMdDownload />,
+              onClick: () => downloadCard(row.original.id),
+            },
+          ]
+        );
 
-            <MenuItem
-              onClick={async () => {
-                setSelectedIdCard(row.original);
-
-                try {
-                  rejectCandidate(row.original.id);
-                  toast.success("Submission rejected.", {
-                    position: "bottom-center",
-                  });
-                  await fecthApprovedSubmissions();
-                } catch (error) {
-                  console.error(error);
-                  toast.error("Something went wrong.", {
-                    position: "bottom-center",
-                  });
-                }
-              }}
-            >
-              Reject Submission
-            </MenuItem>
-
-            <MenuItem
-              onClick={() => {
-                setSelectedIdCard({
-                  ...row.original,
-                  location: {
-                    label: row.original.location.slug,
-                    value: row.original.location.id,
-                  },
-                });
-                onEditOpen();
-              }}
-            >
-              Edit
-            </MenuItem>
-          </MenuList>
-        </Menu>
-      ),
+        return actionsRenderer(actions)(row);
+      },
     },
   ];
 
@@ -150,7 +118,7 @@ export function AdminArrpovalPage() {
   };
 
   const table = useReactTable({
-    data: approvedSubmissions,
+    data: assignedSubmissions,
     columns,
     getCoreRowModel: getCoreRowModel(),
   });
@@ -177,7 +145,7 @@ export function AdminArrpovalPage() {
   };
 
   const selectedRows = Object.keys(selectedRowIds).map(
-    (rowId) => approvedSubmissions[rowId]
+    (rowId) => assignedSubmissions[rowId]
   );
 
   const selectedRowCount = Object.keys(selectedRowIds).filter(
@@ -186,9 +154,8 @@ export function AdminArrpovalPage() {
 
   const fecthApprovedSubmissions = async () => {
     try {
-      const data = await getApprovedCandidates();
-      setApprovedSubmissions(data.results);
-      setTotal(data.count);
+      const data = await getAssignedCompletedSubmissions();
+      setAssignedSubmissions(data);
     } catch (error) {
       console.error(error);
       toast.error("Something went wrong.", {
@@ -210,31 +177,19 @@ export function AdminArrpovalPage() {
       clearInterval(intervalId);
     };
   }, []);
-
   return (
     <MainLayout
-      title="Approved Submissions"
-      content="Approve or reject submissions here."
-      path={["Dashboard", "Submissions", "Approved"]}
+      title="Assigned"
+      content="View assinged submissions."
+      path={["Vendor", "Submissions", "Assigned"]}
     >
-      <Box marginTop="2rem">
-        <Flex justifyContent="flex-end" marginTop="16">
-          <Button
-            colorScheme="blue"
-            isDisabled={selectedRowCount === 0}
-            onClick={onSendToVendorOpen}
-          >
-            Send to Vendor
-          </Button>
-        </Flex>
-
-        <Table mt="2rem">
+      <Box>
+        <Table marginTop="4rem">
           <Thead bg="gray.100" borderBottom="solid 1px" borderColor="gray.500">
             <Tr>
               <Th>
                 <Checkbox
                   isChecked={
-                    selectedRowCount !== 0 &&
                     selectedRowCount === table.getRowModel().rows.length
                   }
                   isIndeterminate={
@@ -258,7 +213,7 @@ export function AdminArrpovalPage() {
                 )}
             </Tr>
           </Thead>
-          <Tbody>
+          <Tbody fontSize="medium">
             {table.getRowModel().rows.map((row) => (
               <Tr key={row.id}>
                 <Td>
@@ -281,26 +236,19 @@ export function AdminArrpovalPage() {
           <ViewModal data={selectedIdCard} isOpen={isOpen} onClose={onClose} />
         )}
 
-        {selectedRowCount > 0 && (
-          <SendToVendorModal
-            mode="create"
-            applications={selectedRows.map((row) => row.id)}
-            isOpen={isSendToVendorOpen}
-            onClose={() => {
-              setSelectedRowIds({});
-              onSendToVendorClose();
-            }}
-            refresh={fecthApprovedSubmissions}
-          />
-        )}
+        <SendToVendorModal
+          mode="create"
+          applications={selectedRows.map((row) => row.id)}
+          isOpen={isSendToVendorOpen}
+          onClose={onSendToVendorClose}
+          refresh={fecthApprovedSubmissions}
+        />
 
         {selectedIdCard && (
-          <AddCandidateModal
-            mode="edit"
+          <ViewModal
             data={selectedIdCard}
-            refresh={fecthApprovedSubmissions}
-            isOpen={isEditOpen}
-            onClose={onEditClose}
+            isOpen={isViewOpen}
+            onClose={onViewClose}
           />
         )}
       </Box>
@@ -308,4 +256,7 @@ export function AdminArrpovalPage() {
   );
 }
 
-export default withProtection(AdminArrpovalPage);
+export default withProtection(CompletedSubmissionsPage, {
+  permissions: ["VENDOR"],
+  redirectTo: "/login",
+});

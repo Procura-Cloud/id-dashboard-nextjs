@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { use, useEffect, useState } from "react";
 import {
   useReactTable,
   getCoreRowModel,
@@ -46,11 +46,12 @@ import MainLayout from "@/components/layouts/MainLayout";
 import { getAllAssignedCandidates } from "@/controllers/candidate.controller";
 import { IoIosSend } from "react-icons/io";
 import { useRouter } from "next/router";
+import withProtection from "@/components/common/ProtectedRoute";
 
-export default function AssignedPanel() {
+function VendorAssignedPage() {
   const [assignedSubmissions, setAssignedSubmissions] = useState([]);
   const [selectedRowIds, setSelectedRowIds] = useState({});
-  const { user, loading } = useAuth();
+  const { user, isLoading } = useAuth();
   const router = useRouter();
 
   const [selectedIdCard, setSelectedIdCard] = useState(null);
@@ -81,7 +82,6 @@ export default function AssignedPanel() {
     { accessorKey: "employeeID", header: "Employee Code" },
     { accessorKey: "status", header: "Status" },
     { accessorKey: "location.slug", header: "Location" },
-    { accessorKey: "vendor.name", header: "Vendor" },
     {
       id: "actions", // Custom column for actions
       header: "Actions",
@@ -183,45 +183,61 @@ export default function AssignedPanel() {
   };
 
   useEffect(() => {
-    if (!router.isReady) return;
-
-    if (!user && !loading) {
-      router.push("/login");
-    }
-
     fecthApprovedSubmissions();
+
+    // Set interval to fetch every 5 seconds
+    const intervalId = setInterval(() => {
+      fecthApprovedSubmissions();
+    }, 10000);
+
+    // Clear interval on component unmount or when deferredSearch changes
+    return () => {
+      clearInterval(intervalId);
+    };
   }, []);
-
-  if (loading || !user) {
-    return (
-      <Box
-        sx={{
-          width: "100vw",
-          height: "100vh",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-        }}
-      >
-        <Spinner
-          thickness="4px"
-          speed="0.65s"
-          emptyColor="gray.200"
-          color="blue.500"
-          size="xl"
-        />
-      </Box>
-    );
-  }
-
   return (
-    <MainLayout>
+    <MainLayout
+      title="Assigned"
+      content="View assinged submissions."
+      path={["Vendor", "Submissions", "Assigned"]}
+    >
       <Box>
-        <Heading variant="h2" size="lg">
-          Assigned
-        </Heading>
-        <Text>View assigned submissions.</Text>
-
+        <HStack justifyContent={"flex-end"}>
+          <Button
+            mt={4}
+            colorScheme="blue"
+            isDisabled={selectedRowCount === 0}
+            onClick={async () => {
+              try {
+                await downloadAndMarkDone(selectedRows.map((row) => row.id));
+              } catch (error) {
+                console.error(error);
+                toast.error("Something went wrong.", {
+                  position: "bottom-center",
+                });
+              }
+            }}
+          >
+            Download and Mark as Done
+          </Button>
+          <Button
+            mt={4}
+            colorScheme="blue"
+            isDisabled={selectedRowCount === 0}
+            onClick={async () => {
+              try {
+                await downloadCards(selectedRows.map((row) => row.id));
+              } catch (error) {
+                console.error(error);
+                toast.error("Something went wrong.", {
+                  position: "bottom-center",
+                });
+              }
+            }}
+          >
+            Download Submissions
+          </Button>
+        </HStack>
         <Table marginTop="4rem">
           <Thead bg="gray.100" borderBottom="solid 1px" borderColor="gray.500">
             <Tr>
@@ -269,42 +285,6 @@ export default function AssignedPanel() {
             ))}
           </Tbody>
         </Table>
-        <HStack>
-          <Button
-            mt={4}
-            colorScheme="blue"
-            isDisabled={selectedRowCount === 0}
-            onClick={async () => {
-              try {
-                await downloadAndMarkDone(selectedRows.map((row) => row.id));
-              } catch (error) {
-                console.error(error);
-                toast.error("Something went wrong.", {
-                  position: "bottom-center",
-                });
-              }
-            }}
-          >
-            Download and Mark as Done
-          </Button>
-          <Button
-            mt={4}
-            colorScheme="blue"
-            isDisabled={selectedRowCount === 0}
-            onClick={async () => {
-              try {
-                await downloadCards(selectedRows.map((row) => row.id));
-              } catch (error) {
-                console.error(error);
-                toast.error("Something went wrong.", {
-                  position: "bottom-center",
-                });
-              }
-            }}
-          >
-            Download Submissions
-          </Button>
-        </HStack>
 
         {selectedIdCard && (
           <ViewModal data={selectedIdCard} isOpen={isOpen} onClose={onClose} />
@@ -329,3 +309,8 @@ export default function AssignedPanel() {
     </MainLayout>
   );
 }
+
+export default withProtection(VendorAssignedPage, {
+  permissions: ["VENDOR"],
+  redirectTo: "/login",
+});

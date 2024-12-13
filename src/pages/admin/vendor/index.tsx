@@ -19,14 +19,13 @@ import ListVendorsTable from "@/components/vendor/ListVendorsTable";
 import { useAuth } from "@/context/AuthContext";
 import { useRouter } from "next/router";
 import MainLayout from "@/components/layouts/MainLayout";
+import withProtection from "@/components/common/ProtectedRoute";
 
-export default function VendorPage() {
+function VendorPage() {
   const [vendors, setVendors] = useState<VendorType[]>([]);
   const { isOpen, onClose, onOpen } = useDisclosure();
   const [search, setSearch] = useQueryState("search");
-  const { user, loading } = useAuth();
-
-  const router = useRouter();
+  const { user } = useAuth();
 
   const defferedSearch = useDeferredValue(search);
 
@@ -50,44 +49,13 @@ export default function VendorPage() {
     fetchVendors();
   }, [defferedSearch]);
 
-  useEffect(() => {
-    if (!router.isReady) return;
-
-    if (!user && !loading) {
-      router.push("/login");
-    }
-  }, []);
-
-  if (!user || loading) {
-    return (
-      <Box
-        sx={{
-          width: "100vw",
-          height: "100vh",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-        }}
-      >
-        <Spinner
-          thickness="4px"
-          speed="0.65s"
-          emptyColor="gray.200"
-          color="blue.500"
-          size="xl"
-        />
-      </Box>
-    );
-  }
-
   return (
-    <MainLayout>
+    <MainLayout
+      title="Vendors"
+      content="Create or delete Vendors here."
+      path={["Dashboard", "Vendors"]}
+    >
       <Box paddingTop="2rem">
-        <Heading variant="h2" size="lg">
-          Vendors
-        </Heading>
-        <Text>Create or delete Vendors here.</Text>
-
         <HStack marginTop="2rem" justifyContent={"flex-end"}>
           <Button leftIcon={<IoMdAdd />} colorScheme="blue" onClick={onOpen}>
             Add Vendor
@@ -114,3 +82,7 @@ export default function VendorPage() {
     </MainLayout>
   );
 }
+
+export default withProtection(VendorPage, {
+  permissions: ["ADMIN"],
+});

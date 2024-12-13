@@ -12,6 +12,8 @@ import { useState } from "react";
 import CreateLocationModal from "./CreateLocationModal";
 import { deleteLocation } from "@/controllers/location.controller";
 import { toast } from "react-toastify";
+import ReactMarkdown from "react-markdown";
+import remarkBreaks from "remark-breaks";
 
 export interface ListLocationTableProps {
   data: LocationType[];
@@ -31,27 +33,22 @@ export default function ListLocationTable(props: ListLocationTableProps) {
       field: "slug",
     },
     {
-      headerName: "Line One",
-      field: "lineOne",
-    },
-    {
-      headerName: "Line Two",
-      field: "lineTwo",
-      formatter: (_, row) => {
-        return row.lineTwo ? row.lineTwo : "-";
+      headerName: "Office Address",
+      field: "preFormattedAddress",
+      renderer: (row) => {
+        return (
+          <ReactMarkdown
+            components={{
+              p: (props) => <p {...props} />,
+            }}
+            remarkPlugins={[remarkBreaks]}
+          >
+            {row.preFormattedAddress}
+          </ReactMarkdown>
+        );
       },
     },
-    {
-      headerName: "Line Three",
-      field: "lineThree",
-      formatter: (_, row) => {
-        return row.lineThree ? row.lineThree : "-";
-      },
-    },
-    {
-      headerName: "Contact",
-      field: "contact",
-    },
+
     {
       headerName: "Actions",
       field: "actions",

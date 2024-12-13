@@ -22,17 +22,14 @@ import ListAdminTable from "@/components/admin/ListAdminTable";
 import { useQueryState } from "nuqs";
 import { ChevronRightIcon } from "@chakra-ui/icons";
 import MainLayout from "@/components/layouts/MainLayout";
-import ProtectedRoute from "@/components/common/ProtectedRoute";
 import { useAuth } from "@/context/AuthContext";
 import { useRouter } from "next/router";
+import withProtection from "@/components/common/ProtectedRoute";
 
-export default function AdminPage() {
+function AdminPage() {
   const [admins, setAdmins] = useState<AdminType[]>([]);
   const { isOpen, onClose, onOpen } = useDisclosure();
   const [search, setSearch] = useQueryState("search");
-  const { user, loading } = useAuth();
-
-  const router = useRouter();
 
   const defferedSearch = useDeferredValue(search);
 
@@ -56,61 +53,13 @@ export default function AdminPage() {
     fetchAdmins();
   }, [defferedSearch]);
 
-  useEffect(() => {
-    if (!router.isReady) return;
-
-    if (!user && !loading) {
-      router.push("/login");
-    }
-  }, []);
-
-  if (!user || loading) {
-    return (
-      <Box
-        sx={{
-          width: "100vw",
-          height: "100vh",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-        }}
-      >
-        <Spinner
-          thickness="4px"
-          speed="0.65s"
-          emptyColor="gray.200"
-          color="blue.500"
-          size="xl"
-        />
-      </Box>
-    );
-  }
-
   return (
-    <MainLayout>
+    <MainLayout
+      title="Admins"
+      content="Add or delete admins here."
+      path={["Dashboard", "Admins"]}
+    >
       <Box paddingTop="2rem">
-        <HStack justifyContent="space-between" alignItems="center">
-          <Breadcrumb
-            size="sm"
-            fontSize="sm"
-            spacing="8px"
-            separator={<ChevronRightIcon color="gray.500" />}
-          >
-            <BreadcrumbItem>
-              <BreadcrumbLink href="#">Dashboard</BreadcrumbLink>
-            </BreadcrumbItem>
-            <BreadcrumbItem>
-              <BreadcrumbLink href="/admin">Admins</BreadcrumbLink>
-            </BreadcrumbItem>
-          </Breadcrumb>
-
-          <Avatar name={user.name} />
-        </HStack>
-        <Heading variant="h2" size="lg" mt="4">
-          Admins
-        </Heading>
-        <Text>Create or delete admins here.</Text>
-
         <HStack marginTop="2rem" justifyContent={"flex-end"}>
           <Button leftIcon={<IoMdAdd />} colorScheme="blue" onClick={onOpen}>
             Add Admin
@@ -137,3 +86,5 @@ export default function AdminPage() {
     </MainLayout>
   );
 }
+
+export default withProtection(AdminPage);

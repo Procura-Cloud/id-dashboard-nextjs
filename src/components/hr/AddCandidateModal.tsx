@@ -81,6 +81,7 @@ export default function AddCandidateModal({
           name: data.name,
           email: data.email,
           photoUrl: data.photoUrl,
+          employeeID: data.employeeID,
           locationID: data.location?.value,
         });
 

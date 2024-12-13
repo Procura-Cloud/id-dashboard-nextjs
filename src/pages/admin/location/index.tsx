@@ -24,14 +24,19 @@ import { ChevronRightIcon } from "@chakra-ui/icons";
 import { useAuth } from "@/context/AuthContext";
 import { useRouter } from "next/router";
 import MainLayout from "@/components/layouts/MainLayout";
+import withProtection from "@/components/common/ProtectedRoute";
+import PaginationComponent from "@/components/common/PaginationRow";
+import usePagination from "@/hooks/Pagination";
 
-export default function VendorPage() {
+function LocationPage() {
   const [locations, setLocations] = useState<LocationType[]>([]);
   const { isOpen, onClose, onOpen } = useDisclosure();
   const [search, setSearch] = useQueryState("search");
-  const { user, loading } = useAuth();
-
-  const router = useRouter();
+  const { currentPage, nextPage, prevPage, goToPage } = usePagination(
+    locations.length
+  );
+  const [total, setTotal] = useState(0);
+  const { user } = useAuth();
 
   const defferedSearch = useDeferredValue(search);
 
@@ -42,7 +47,8 @@ export default function VendorPage() {
           search,
         },
       });
-      setLocations(locations);
+      setLocations(locations.results);
+      setTotal(locations.total);
     } catch (error) {
       console.error(error);
       toast.error("Something went wrong.", {
@@ -55,62 +61,13 @@ export default function VendorPage() {
     fetchLocations();
   }, [defferedSearch]);
 
-  useEffect(() => {
-    if (!router.isReady) return;
-
-    if (!user && !loading) {
-      router.push("/login");
-    }
-  }, []);
-
-  if (!user || loading) {
-    return (
-      <Box
-        sx={{
-          width: "100vw",
-          height: "100vh",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-        }}
-      >
-        <Spinner
-          thickness="4px"
-          speed="0.65s"
-          emptyColor="gray.200"
-          color="blue.500"
-          size="xl"
-        />
-      </Box>
-    );
-  }
-
   return (
-    <MainLayout>
+    <MainLayout
+      title="Locations"
+      content="Create or delete Office locations here."
+      path={["Dashboard", "Locations"]}
+    >
       <Box paddingTop="2rem">
-        <HStack justifyContent="space-between">
-          <Breadcrumb
-            size="sm"
-            fontSize="sm"
-            spacing="8px"
-            separator={<ChevronRightIcon color="gray.500" />}
-          >
-            <BreadcrumbItem>
-              <BreadcrumbLink href="#">Dashboard</BreadcrumbLink>
-            </BreadcrumbItem>
-            <BreadcrumbItem>
-              <BreadcrumbLink href="/locations">Locations</BreadcrumbLink>
-            </BreadcrumbItem>
-          </Breadcrumb>
-
-          <Avatar name={user.name} />
-        </HStack>
-
-        <Heading variant="h2" size="lg">
-          Locations
-        </Heading>
-        <Text>Create or delete Office locations here.</Text>
-
         <HStack marginTop="2rem" justifyContent={"flex-end"}>
           <Button leftIcon={<IoMdAdd />} colorScheme="blue" onClick={onOpen}>
             Add Location
@@ -125,6 +82,12 @@ export default function VendorPage() {
           />
         </Box>
 
+        <PaginationComponent
+          total={total}
+          currentPage={currentPage}
+          nextPage={nextPage}
+          prevPage={prevPage}
+        />
         <ListLocationTable data={locations} refresh={fetchLocations} />
 
         <CreateLocationModal
@@ -137,3 +100,5 @@ export default function VendorPage() {
     </MainLayout>
   );
 }
+
+export default withProtection(LocationPage);
