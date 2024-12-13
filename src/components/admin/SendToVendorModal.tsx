@@ -102,9 +102,12 @@ export default function SendToVendorModal({
                 await refresh();
               } catch (error) {
                 console.error(error);
-                toast.error("Something went wrong.", {
-                  position: "bottom-center",
-                });
+
+                if (error.response) {
+                  toast.error(error.response.data.message, {
+                    position: "bottom-center",
+                  });
+                }
               }
             }}
           >

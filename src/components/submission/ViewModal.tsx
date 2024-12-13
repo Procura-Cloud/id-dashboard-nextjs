@@ -34,7 +34,7 @@ export default function ViewModal({ data, isOpen, onClose }: ViewModalProps) {
     <Modal isOpen={isOpen} onClose={onClose}>
       <ModalOverlay />
       <ModalContent sx={{ height: "min(80vh, 800px)", padding: 0 }}>
-        <ModalHeader>Create Admin</ModalHeader>
+        <ModalHeader>View ID Card</ModalHeader>
         <ModalCloseButton />
         <ModalBody sx={{ padding: 0 }}>
           <embed

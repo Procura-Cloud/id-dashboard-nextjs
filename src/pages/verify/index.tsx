@@ -6,14 +6,14 @@ import { toast } from "react-toastify";
 
 export default function VerifyPage() {
   const router = useRouter();
-  const { login, loading, user } = useAuth();
+  const { login, isLoading, user } = useAuth();
 
   useEffect(() => {
     const token = router.query.token as string;
 
-    if (!router.isReady) return;
+    if (!router.isReady || isLoading) return;
 
-    if (!loading && !user) {
+    if (!user) {
       router.push("/login");
     }
 

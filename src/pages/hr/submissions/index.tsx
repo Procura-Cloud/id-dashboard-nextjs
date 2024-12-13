@@ -5,7 +5,9 @@ import {
   BreadcrumbItem,
   BreadcrumbLink,
   Button,
+  ButtonGroup,
   HStack,
+  IconButton,
   Input,
   Spinner,
   useDisclosure,
@@ -20,33 +22,38 @@ import CreateHRModal from "@/components/hr/CreateHRModal";
 import ListHRTable from "@/components/hr/ListHRTable";
 import { HRType } from "@/schema/hr.schema";
 import { listHRs } from "@/controllers/hr.controller";
-import { ChevronRightIcon } from "@chakra-ui/icons";
+import { ChevronLeftIcon, ChevronRightIcon } from "@chakra-ui/icons";
 import { useAuth } from "@/context/AuthContext";
 import { useRouter } from "next/router";
 import MainLayout from "@/components/layouts/MainLayout";
 import NoResults from "@/components/common/NoResults";
 import { SubmissionCard } from "@/components/hr/HRSubmissionPanel";
 import { listSumbmissions } from "@/controllers/candidate.controller";
-import Pagination from "@/components/common/ProtectedRoute";
-import usePagination from "@/hooks/Pagination";
 import AddCandidateModal from "@/components/hr/AddCandidateModal";
+import withProtection from "@/components/common/ProtectedRoute";
+import usePagination from "@/hooks/Pagination";
+import PaginationComponent from "@/components/common/PaginationRow";
 
-export default function HRSubmissionsPage() {
+function HRSubmissionsPage() {
   const [submissions, setSubmissions] = useState([]);
+  const [total, setTotal] = useState(0);
   const { isOpen, onClose, onOpen } = useDisclosure();
   const [search, setSearch] = useQueryState("search");
-  const { user, loading } = useAuth();
+  const defferedSearch = useDeferredValue(search);
+  const { user } = useAuth();
 
-  const router = useRouter();
+  const { currentPage, nextPage, prevPage } = usePagination(submissions.length);
 
   const fetchSubmissions = async () => {
     try {
       const submissions = await listSumbmissions({
         params: {
           search,
+          page: currentPage,
         },
       });
-      setSubmissions(submissions);
+      setSubmissions(submissions.results);
+      setTotal(submissions.total);
     } catch (error) {
       console.error(error);
       toast.error("Something went wrong.", {
@@ -63,63 +70,15 @@ export default function HRSubmissionsPage() {
     }, 5000);
 
     return () => clearInterval(intervalId); // Cleanup on unmount
-  }, []);
-
-  useEffect(() => {
-    if (!router.isReady) return;
-
-    if ((!user && !loading) || (user && user.role !== "HR")) {
-      router.push("/login");
-    }
-  }, []);
-
-  if (!user || loading) {
-    return (
-      <Box
-        sx={{
-          width: "100vw",
-          height: "100vh",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-        }}
-      >
-        <Spinner
-          thickness="4px"
-          speed="0.65s"
-          emptyColor="gray.200"
-          color="blue.500"
-          size="xl"
-        />
-      </Box>
-    );
-  }
+  }, [currentPage, defferedSearch]);
 
   return (
-    <MainLayout>
+    <MainLayout
+      title="Submissions"
+      content="Create or edit submissions here."
+      path={["Dashboard", "Submissions"]}
+    >
       <Box paddingTop="2rem">
-        <HStack justifyContent="space-between">
-          <Breadcrumb
-            size="sm"
-            fontSize="sm"
-            spacing="8px"
-            separator={<ChevronRightIcon color="gray.500" />}
-          >
-            <BreadcrumbItem>
-              <BreadcrumbLink href="#">Dashboard</BreadcrumbLink>
-            </BreadcrumbItem>
-            <BreadcrumbItem>
-              <BreadcrumbLink href="/admin">Submissions</BreadcrumbLink>
-            </BreadcrumbItem>
-          </Breadcrumb>
-
-          <Avatar name={user.name} />
-        </HStack>
-        <Heading variant="h2" size="lg">
-          Submissions
-        </Heading>
-        <Text>Create or delete submissions here.</Text>
-
         <HStack marginTop="2rem" justifyContent={"flex-end"}>
           {(user.role === "ADMIN" || user.role === "HR") && (
             <Button leftIcon={<IoMdAdd />} colorScheme="blue" onClick={onOpen}>
@@ -133,6 +92,13 @@ export default function HRSubmissionsPage() {
           onChange={(e) => setSearch(e.target.value)}
           placeholder="Search Submissions"
           my="4"
+        />
+
+        <PaginationComponent
+          total={total}
+          currentPage={currentPage}
+          nextPage={nextPage}
+          prevPage={prevPage}
         />
 
         <Box>
@@ -151,7 +117,6 @@ export default function HRSubmissionsPage() {
                 employeeID={submission.employeeID || "-"}
                 email={submission.email}
                 stage={submission.stage || "-"}
-                locationId={submission.locationId}
                 vendor={submission.vendor ? submission.vendor.name : "-"}
                 location={
                   submission.location && {
@@ -170,3 +135,5 @@ export default function HRSubmissionsPage() {
     </MainLayout>
   );
 }
+
+export default withProtection(HRSubmissionsPage);

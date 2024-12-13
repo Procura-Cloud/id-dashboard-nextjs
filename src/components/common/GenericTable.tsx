@@ -49,7 +49,13 @@ export default function GenericTable({
         </Thead>
         <Tbody>
           {data.map((row, index) => (
-            <Tr fontSize="sm" key={index} bg={row.bgColor}>
+            <Tr
+              fontSize="sm"
+              key={index}
+              bg={row.bgColor}
+              verticalAlign="top"
+              textAlign="center"
+            >
               {columns.map((column, index) => (
                 <Td py={removePadding ? 0 : 2} key={index}>
                   <Box px={column.px}>{renderCell(row, column)}</Box>

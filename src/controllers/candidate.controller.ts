@@ -19,8 +19,10 @@ export const updateCandidate = async (id: string | number, data) => {
   return response.data;
 };
 
-export const getAllAssignedCandidates = async () => {
-  const response = await axiosClient.get("/candidate/assigned-candidates");
+export const getAllAssignedCandidates = async (params = {}) => {
+  const response = await axiosClient.get("/candidate/assigned-candidates", {
+    params,
+  });
 
   return response.data;
 };
@@ -42,6 +44,12 @@ export const requestChanges = async (id, data) => {
 
 export const getApprovedCandidates = async () => {
   const response = await axiosClient.get("/candidate/approved-submissions");
+
+  return response.data;
+};
+
+export const rejectCandidate = async (id) => {
+  const response = await axiosClient.patch(`/candidate/reject/${id}`);
 
   return response.data;
 };
@@ -103,6 +111,12 @@ export const getCompletedSubmissions = async (options = {}) => {
     "/candidate/completed-submissions",
     options
   );
+
+  return response.data;
+};
+
+export const sendToHr = async (id: string) => {
+  const response = await axiosClient.patch(`/candidate/send-back-to-hr/${id}`);
 
   return response.data;
 };

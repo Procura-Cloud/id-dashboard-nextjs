@@ -38,6 +38,14 @@ export const getAssignedCandidates = async () => {
   return response.data;
 };
 
+export const getAssignedCompletedSubmissions = async () => {
+  const response = await axiosClient.get(
+    `/vendor/assigned-completed-submissions`
+  );
+
+  return response.data;
+};
+
 export const suggestVendor = async (options = {}) => {
   const response = await axiosClient.get("/vendor/suggest", options);
 

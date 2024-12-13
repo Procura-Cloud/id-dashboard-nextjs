@@ -42,15 +42,25 @@ import { Action, actionsRenderer } from "@/components/common/GenericTable";
 import ViewModal from "@/components/submission/ViewModal";
 import SendToVendorModal from "@/components/admin/SendToVendorModal";
 import MainLayout from "@/components/layouts/MainLayout";
-import { getAllAssignedCandidates } from "@/controllers/candidate.controller";
+import {
+  getAllAssignedCandidates,
+  rejectCandidate,
+} from "@/controllers/candidate.controller";
 import { IoIosSend } from "react-icons/io";
+import withProtection from "@/components/common/ProtectedRoute";
+import { MdOutlineClose } from "react-icons/md";
+import PaginationComponent from "@/components/common/PaginationRow";
+import usePagination from "@/hooks/Pagination";
 
-export default function AssignedPanel() {
+function AssignedPanel() {
   const [assignedSubmissions, setAssignedSubmissions] = useState([]);
+  const [total, setTotal] = useState(0);
   const [selectedRowIds, setSelectedRowIds] = useState({});
   const { user } = useAuth();
 
   const [selectedIdCard, setSelectedIdCard] = useState(null);
+
+  const { currentPage, nextPage, prevPage, goToPage } = usePagination(0);
 
   const { isOpen, onOpen, onClose } = useDisclosure();
 
@@ -114,6 +124,30 @@ export default function AssignedPanel() {
                     [row.id]: true,
                   });
                   onSendToVendorOpen();
+                }
+              },
+            },
+            {
+              label: "Reject Submission",
+              icon: <MdOutlineClose />,
+              onClick: async () => {
+                if (
+                  confirm(
+                    "Are you sure that you want to reject this submission? "
+                  )
+                ) {
+                  try {
+                    await rejectCandidate(row.original.id);
+                    toast.success("Submission rejected.", {
+                      position: "bottom-center",
+                    });
+                    await fecthApprovedSubmissions();
+                  } catch (error) {
+                    console.error(error);
+                    toast.error("Something went wrong.", {
+                      position: "bottom-center",
+                    });
+                  }
                 }
               },
             },
@@ -184,8 +218,12 @@ export default function AssignedPanel() {
 
   const fecthApprovedSubmissions = async () => {
     try {
-      const data = await getAllAssignedCandidates();
-      setAssignedSubmissions(data);
+      const data = await getAllAssignedCandidates({
+        page: currentPage,
+      });
+
+      setAssignedSubmissions(data.results);
+      setTotal(data.total);
     } catch (error) {
       console.error(error);
       toast.error("Something went wrong.", {
@@ -196,17 +234,22 @@ export default function AssignedPanel() {
 
   useEffect(() => {
     fecthApprovedSubmissions();
-  }, []);
+  }, [currentPage]);
 
   return (
-    <MainLayout>
-      <Box>
-        <Heading variant="h2" size="lg">
-          Assigned
-        </Heading>
-        <Text>View assigned submissions.</Text>
-
-        <Table marginTop="4rem">
+    <MainLayout
+      title="Assigned"
+      content="View assigned submissions."
+      path={["Dashboard", "Submissions", "Assigned"]}
+    >
+      <Box mt="2rem">
+        <PaginationComponent
+          total={total}
+          currentPage={currentPage}
+          nextPage={nextPage}
+          prevPage={prevPage}
+        />
+        <Table marginTop="1rem">
           <Thead bg="gray.100" borderBottom="solid 1px" borderColor="gray.500">
             <Tr>
               <Th>
@@ -313,3 +356,5 @@ export default function AssignedPanel() {
     </MainLayout>
   );
 }
+
+export default withProtection(AssignedPanel);

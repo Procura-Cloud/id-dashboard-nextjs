@@ -14,6 +14,7 @@ import {
   Input,
   FormErrorMessage,
   VStack,
+  Textarea,
 } from "@chakra-ui/react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "react-toastify";
@@ -51,11 +52,9 @@ export default function CreateLocationModal({
     formState: { errors, isSubmitting, isValid },
   } = useForm<LocationType>({
     defaultValues: {
+      id: data?.id ?? "",
       slug: data?.slug ?? "",
-      lineOne: data?.lineOne ?? "",
-      lineTwo: data?.lineTwo ?? "",
-      lineThree: data?.lineThree ?? "",
-      contact: data?.contact ?? "",
+      preFormattedAddress: data?.preFormattedAddress ?? "",
     },
     resolver: zodResolver(locationSchema),
     mode: "onChange",
@@ -66,10 +65,7 @@ export default function CreateLocationModal({
       if (mode === "create") {
         const response = await createLocation({
           slug: data.slug,
-          lineOne: data.lineOne,
-          lineTwo: data.lineTwo,
-          lineThree: data.lineThree,
-          contact: data.contact,
+          preFormattedAddress: data.preFormattedAddress,
         });
 
         toast.success("Location created successfully.", {
@@ -79,17 +75,13 @@ export default function CreateLocationModal({
 
       if (mode === "edit") {
         const response = await updateLocation(data.id, {
-          lineOne: data.lineOne,
-          lineTwo: data.lineTwo,
-          lineThree: data.lineThree,
-          contact: data.contact,
+          preFormattedAddress: data.preFormattedAddress,
         });
 
         toast.success("Location updated successfully.", {
           position: "bottom-center",
         });
       }
-
       await refresh();
     } catch (error) {
       toast.error(error?.message ?? "Something went wrong.", {
@@ -118,34 +110,16 @@ export default function CreateLocationModal({
                   <FormErrorMessage>{errors.slug.message}</FormErrorMessage>
                 )}
               </FormControl>
-              <FormControl isRequired isInvalid={!!errors.lineOne}>
-                <FormLabel>Line One</FormLabel>
-                <Input placeholder="Line One" {...register("lineOne")} />
-                {errors.lineOne && (
-                  <FormErrorMessage>{errors.lineOne.message}</FormErrorMessage>
-                )}
-              </FormControl>
-              <FormControl isInvalid={!!errors.lineTwo}>
-                <FormLabel>Line Two</FormLabel>
-                <Input placeholder="Line Two" {...register("lineTwo")} />
-                {errors.lineTwo && (
-                  <FormErrorMessage>{errors.lineTwo.message}</FormErrorMessage>
-                )}
-              </FormControl>
-              <FormControl isInvalid={!!errors.lineThree}>
-                <FormLabel>Line Three</FormLabel>
-                <Input placeholder="Line Three" {...register("lineThree")} />
-                {errors.lineThree && (
+              <FormControl isRequired isInvalid={!!errors.preFormattedAddress}>
+                <FormLabel>Office Address</FormLabel>
+                <Textarea
+                  placeholder="Enter the office address here"
+                  {...register("preFormattedAddress")}
+                />
+                {errors.preFormattedAddress && (
                   <FormErrorMessage>
-                    {errors.lineThree.message}
+                    {errors.preFormattedAddress.message}
                   </FormErrorMessage>
-                )}
-              </FormControl>
-              <FormControl isRequired isInvalid={!!errors.contact}>
-                <FormLabel>Line Four</FormLabel>
-                <Input placeholder="Line Four" {...register("contact")} />
-                {errors.contact && (
-                  <FormErrorMessage>{errors.contact.message}</FormErrorMessage>
                 )}
               </FormControl>
             </VStack>

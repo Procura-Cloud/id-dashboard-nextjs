@@ -29,6 +29,8 @@ import PaginationRow from "../common/PaginationRow";
 import NoResults from "../common/NoResults";
 import { useAuth } from "@/context/AuthContext";
 import ViewModal from "../submission/ViewModal";
+import { FiLoader } from "react-icons/fi";
+import OpenSubmissionPanel from "../submission/OpenSubmissionPanel";
 
 export function SubmissionCard({
   id,
@@ -40,7 +42,6 @@ export function SubmissionCard({
   status,
   stage,
   refresh,
-  locationId,
   vendor,
 }: {
   id: number;
@@ -52,7 +53,6 @@ export function SubmissionCard({
     value: string;
     label: string;
   };
-  locationId: string;
   status: string;
   stage: string;
   vendor: any;
@@ -74,6 +74,12 @@ export function SubmissionCard({
     isOpen: isViewCardOpen,
     onOpen: onViewCardOpen,
     onClose: onViewCardClose,
+  } = useDisclosure();
+
+  const {
+    isOpen: isOpenSubmissionOpen,
+    onOpen: onOpenSubmissionOpen,
+    onClose: onOpenSubmissionClose,
   } = useDisclosure();
 
   const { user } = useAuth();
@@ -105,12 +111,13 @@ export function SubmissionCard({
       variant="outline"
       width="100%"
       mb="4"
+      border="0.05px solid #c5c6c8"
     >
       <Box
         sx={{
           justifySelf: "center",
           width: "175px",
-          height: "240px",
+          minHeight: "100%",
           backgroundColor: "gray.300",
           display: "flex",
           alignItems: "center",
@@ -122,7 +129,13 @@ export function SubmissionCard({
         {!src ? (
           <FaCamera />
         ) : (
-          <Image src={src} alt="ID Card" width="100%" height="100%" />
+          <Image
+            src={src}
+            objectFit="cover"
+            alt="ID Card"
+            width="100%"
+            height="100%"
+          />
         )}
       </Box>
 
@@ -132,7 +145,7 @@ export function SubmissionCard({
 
           <Text mt="2">Employee ID: {employeeID}</Text>
           <Text>Email: {email}</Text>
-          <Text>Location: {location.label}</Text>
+          <Text>Location: {location?.label ?? "-"}</Text>
           <Text>
             Status:
             <Tag ml="2" color="teal" colorScheme="teal">
@@ -140,10 +153,8 @@ export function SubmissionCard({
             </Tag>
           </Text>
           <Text>
-            Stage:{" "}
-            {stage === "VENDOR"
-              ? `${vendor.name ? vendor.name : "-"} (VENDOR)`
-              : stage}
+            Stage:
+            {stage === "VENDOR" ? `${vendor?.name ?? "-"} (VENDOR)` : stage}
           </Text>
         </CardBody>
 
@@ -192,6 +203,18 @@ export function SubmissionCard({
               Approve
             </Button>
           )}
+
+          {user.role === "ADMIN" &&
+            (status === "DONE" || status === "REJECTED") && (
+              <Button
+                leftIcon={<FiLoader />}
+                variant="solid"
+                colorScheme="blue"
+                onClick={onOpenSubmissionOpen}
+              >
+                Open Again
+              </Button>
+            )}
         </CardFooter>
       </Stack>
 
@@ -220,6 +243,12 @@ export function SubmissionCard({
         data={{ id }}
         isOpen={isViewCardOpen}
         onClose={onViewCardClose}
+      />
+
+      <OpenSubmissionPanel
+        submission={{ id }}
+        isOpen={isOpenSubmissionOpen}
+        onClose={onOpenSubmissionClose}
       />
     </Card>
   );
@@ -281,7 +310,6 @@ export default function HRSubmissionPanel() {
               employeeID={submission.employeeID || "-"}
               email={submission.email}
               stage={submission.stage || "-"}
-              locationId={submission.locationId}
               vendor={submission.vendor ? submission.vendor.name : "-"}
               location={
                 submission.location && {

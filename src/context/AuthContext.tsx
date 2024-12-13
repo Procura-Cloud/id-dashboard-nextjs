@@ -1,19 +1,15 @@
 import { verifyAuthToken } from "@/controllers/auth.controller";
-import { Box, Spinner } from "@chakra-ui/react";
 import { useRouter } from "next/router";
 import { createContext, useContext, useEffect, useState } from "react";
 import { toast } from "react-toastify";
 
 export interface AuthContextType {
-  verifyToken: (token: string) => Promise<{
-    id: string;
-    email: string;
-    role: "ADMIN" | "HR" | "VENDOR";
-  }>;
   user: any; // Replace with your user type/interface
   token: string | null;
-  loading: boolean;
+  isLoading: boolean;
   login: (token: string) => Promise<void>;
+  logout: () => void;
+  isAuthenticated: boolean;
 }
 
 const AuthContext = createContext<AuthContextType>({} as AuthContextType);
@@ -23,16 +19,12 @@ export const useAuth = () => useContext(AuthContext);
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
   const [token, setToken] = useState<string | null>(null);
-  const [loading, setLoading] = useState(true); // Loading state to prevent flickering
+  const [isLoading, setisLoading] = useState(false); // Loading state to prevent flickering
 
   const router = useRouter();
 
   const login = async (token: string) => {
-    return await verifyToken(token);
-  };
-
-  const verifyToken = async (token: string) => {
-    setLoading(true);
+    setisLoading(true);
     try {
       const response = await verifyAuthToken(token);
 
@@ -56,8 +48,15 @@ export function AuthProvider({ children }) {
 
       return null;
     } finally {
-      setLoading(false);
+      setisLoading(false);
     }
+  };
+
+  const logout = async () => {
+    localStorage.removeItem("token");
+    localStorage.removeItem("user");
+    setUser(null);
+    setToken(null);
   };
 
   useEffect(() => {
@@ -67,7 +66,7 @@ export function AuthProvider({ children }) {
     if (storedToken && storedUser) {
       (async () => {
         try {
-          await verifyToken(storedToken); // Re-verify token on page load
+          await login(storedToken); // Re-verify token on page load
         } catch {
           localStorage.removeItem("token");
           localStorage.removeItem("user");
@@ -75,22 +74,25 @@ export function AuthProvider({ children }) {
             position: "bottom-center",
           });
         } finally {
-          setLoading(false);
+          setisLoading(false);
         }
       })();
     } else {
-      setLoading(false);
+      setisLoading(false);
     }
   }, []);
+
+  const isAuthenticated = !!user;
 
   return (
     <AuthContext.Provider
       value={{
-        verifyToken,
         user,
         token,
         login,
-        loading,
+        logout,
+        isLoading,
+        isAuthenticated,
       }}
     >
       {children}

@@ -30,8 +30,10 @@ import { listSumbmissions } from "@/controllers/candidate.controller";
 import Pagination from "@/components/common/ProtectedRoute";
 import usePagination from "@/hooks/Pagination";
 import AddCandidateModal from "@/components/hr/AddCandidateModal";
+import withProtection from "@/components/common/ProtectedRoute";
+import PaginationComponent from "@/components/common/PaginationRow";
 
-export default function AdminSubmissionsPage() {
+function AdminSubmissionsPage() {
   const [submissions, setSubmissions] = useState([]);
   const {
     isOpen: isAddCandidateOpen,
@@ -44,18 +46,23 @@ export default function AdminSubmissionsPage() {
     onOpen: onLostAndFoundOpen,
   } = useDisclosure();
   const [search, setSearch] = useQueryState("search");
-  const { user, loading } = useAuth();
+  const [total, setTotal] = useState(0);
+  const { currentPage, prevPage, nextPage } = usePagination(submissions.length);
 
-  const router = useRouter();
+  const { user } = useAuth();
+
+  const defferedSearch = useDeferredValue(search);
 
   const fetchSubmissions = async () => {
     try {
       const submissions = await listSumbmissions({
         params: {
           search,
+          page: currentPage,
         },
       });
-      setSubmissions(submissions);
+      setSubmissions(submissions.results);
+      setTotal(submissions.total);
     } catch (error) {
       console.error(error);
       toast.error("Something went wrong.", {
@@ -72,63 +79,15 @@ export default function AdminSubmissionsPage() {
     }, 5000);
 
     return () => clearInterval(intervalId); // Cleanup on unmount
-  }, []);
-
-  useEffect(() => {
-    if (!router.isReady) return;
-
-    if ((!user && !loading) || (user && user.role !== "ADMIN")) {
-      router.push("/login");
-    }
-  }, []);
-
-  if (!user || loading) {
-    return (
-      <Box
-        sx={{
-          width: "100vw",
-          height: "100vh",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-        }}
-      >
-        <Spinner
-          thickness="4px"
-          speed="0.65s"
-          emptyColor="gray.200"
-          color="blue.500"
-          size="xl"
-        />
-      </Box>
-    );
-  }
+  }, [defferedSearch, currentPage]);
 
   return (
-    <MainLayout>
+    <MainLayout
+      title="Submissions"
+      content="Create or edit submissions here."
+      path={["Dashboard", "Submissions"]}
+    >
       <Box paddingTop="2rem">
-        <HStack justifyContent="space-between">
-          <Breadcrumb
-            size="sm"
-            fontSize="sm"
-            spacing="8px"
-            separator={<ChevronRightIcon color="gray.500" />}
-          >
-            <BreadcrumbItem>
-              <BreadcrumbLink href="#">Dashboard</BreadcrumbLink>
-            </BreadcrumbItem>
-            <BreadcrumbItem>
-              <BreadcrumbLink href="/admin">Submissions</BreadcrumbLink>
-            </BreadcrumbItem>
-          </Breadcrumb>
-
-          <Avatar name={user.name} />
-        </HStack>
-        <Heading variant="h2" size="lg">
-          Submissions
-        </Heading>
-        <Text>Create or delete submissions here.</Text>
-
         <HStack marginTop="2rem" justifyContent={"flex-end"}>
           {(user.role === "ADMIN" || user.role === "HR") && (
             <Button
@@ -158,6 +117,13 @@ export default function AdminSubmissionsPage() {
           my="4"
         />
 
+        <PaginationComponent
+          total={total}
+          currentPage={currentPage}
+          nextPage={nextPage}
+          prevPage={prevPage}
+        />
+
         <Box>
           {submissions.length === 0 && (
             <NoResults message="No submissions found." />
@@ -174,7 +140,6 @@ export default function AdminSubmissionsPage() {
                 employeeID={submission.employeeID || "-"}
                 email={submission.email}
                 stage={submission.stage || "-"}
-                locationId={submission.locationId}
                 vendor={submission.vendor ? submission.vendor.name : "-"}
                 location={
                   submission.location && {
@@ -207,3 +172,5 @@ export default function AdminSubmissionsPage() {
     </MainLayout>
   );
 }
+
+export default withProtection(AdminSubmissionsPage);
