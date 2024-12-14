@@ -6,9 +6,12 @@ import {
   BreadcrumbLink,
   Button,
   ButtonGroup,
+  FormControl,
+  FormLabel,
   HStack,
   IconButton,
   Input,
+  Select,
   Spinner,
   useDisclosure,
 } from "@chakra-ui/react";
@@ -33,6 +36,8 @@ import AddCandidateModal from "@/components/hr/AddCandidateModal";
 import withProtection from "@/components/common/ProtectedRoute";
 import usePagination from "@/hooks/Pagination";
 import PaginationComponent from "@/components/common/PaginationRow";
+import AsyncSelect from "react-select/async";
+import { suggestLocations } from "@/controllers/location.controller";
 
 function HRSubmissionsPage() {
   const [submissions, setSubmissions] = useState([]);
@@ -44,12 +49,20 @@ function HRSubmissionsPage() {
 
   const { currentPage, nextPage, prevPage } = usePagination(submissions.length);
 
+  // Filters
+  const [location, setLocation] = useState(null);
+  const [status, setStatus] = useState("");
+  const [stage, setStage] = useState("");
+
   const fetchSubmissions = async () => {
     try {
       const submissions = await listSumbmissions({
         params: {
           search,
           page: currentPage,
+          ...(status && { status }),
+          ...(stage && { stage }),
+          ...(location && { location: location.value }),
         },
       });
       setSubmissions(submissions.results);
@@ -62,6 +75,22 @@ function HRSubmissionsPage() {
     }
   };
 
+  const loadOptions = async (inputValue) => {
+    if (!inputValue) return [];
+    try {
+      const data = await suggestLocations({
+        params: {
+          search: inputValue,
+        },
+      });
+
+      return data;
+    } catch (error) {
+      console.error("Error fetching items:", error);
+      return [];
+    }
+  };
+
   useEffect(() => {
     fetchSubmissions();
 
@@ -70,7 +99,7 @@ function HRSubmissionsPage() {
     }, 5000);
 
     return () => clearInterval(intervalId); // Cleanup on unmount
-  }, [currentPage, defferedSearch]);
+  }, [currentPage, defferedSearch, status, stage, location]);
 
   return (
     <MainLayout
@@ -94,6 +123,42 @@ function HRSubmissionsPage() {
           my="4"
         />
 
+        {/* Filters */}
+        <HStack mb="4" flexDirection={{ sm: "column", md: "row" }}>
+          <FormControl>
+            <FormLabel>Status</FormLabel>
+            <Select value={status} onChange={(e) => setStatus(e.target.value)}>
+              <option value="">All</option>
+              <option value="PENDING">Pending</option>
+              <option value="APPROVED">Approved</option>
+              <option value="NEED_CHANGES">Need Changes</option>
+              <option value="DONE">Done</option>
+              <option value="REJECTED">Rejected</option>
+            </Select>
+          </FormControl>
+          <FormControl>
+            <FormLabel>Stage</FormLabel>
+            <Select value={stage} onChange={(e) => setStage(e.target.value)}>
+              <option value="">All</option>
+              <option value="CANDIDATE">Candidate</option>
+              <option value="HR">HR</option>
+              <option value="ADMIN">Admin</option>
+            </Select>
+          </FormControl>
+          <FormControl>
+            <FormLabel>Location</FormLabel>
+            <AsyncSelect
+              cacheOptions
+              isClearable
+              value={location} // Ensure the correct value is displayed
+              loadOptions={loadOptions}
+              onChange={(e) => setLocation(e)}
+              placeholder="Search items..."
+            />
+          </FormControl>
+        </HStack>
+
+        {/* Pagination */}
         <PaginationComponent
           total={total}
           currentPage={currentPage}

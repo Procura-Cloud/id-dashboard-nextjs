@@ -14,27 +14,16 @@ import {
   Checkbox,
   Box,
   Button,
-  Menu,
-  MenuButton,
-  IconButton,
-  MenuList,
-  MenuItem,
   useDisclosure,
   HStack,
-  Heading,
-  Text,
 } from "@chakra-ui/react";
 import { toast } from "react-toastify";
-import { ChevronDownIcon } from "@chakra-ui/icons";
-import { FaEye } from "react-icons/fa";
-import ReactPDF from "@react-pdf/renderer";
-import { MyDocument } from "@/template/IDCard";
 import {
   downloadAndMarkDone,
   downloadCard,
   downloadCards,
-  getAssignedCandidates,
   markCompleted,
+  suggestVendor,
 } from "@/controllers/vendor.controller";
 import { useAuth } from "@/context/AuthContext";
 import { IoMdCheckmark, IoMdDownload, IoMdEye } from "react-icons/io";
@@ -51,8 +40,17 @@ import withProtection from "@/components/common/ProtectedRoute";
 import { MdOutlineClose } from "react-icons/md";
 import PaginationComponent from "@/components/common/PaginationRow";
 import usePagination from "@/hooks/Pagination";
+import AsyncSelect from "react-select/async";
 
 function AssignedPanel() {
+  const [selectedVendor, setSelectedVendor] = useState<{
+    label: string;
+    value: string;
+  } | null>(null);
+  const [options, setOptions] = useState<{ label: string; value: string }[]>(
+    []
+  );
+
   const [assignedSubmissions, setAssignedSubmissions] = useState([]);
   const [total, setTotal] = useState(0);
   const [selectedRowIds, setSelectedRowIds] = useState({});
@@ -75,6 +73,27 @@ function AssignedPanel() {
     onOpen: onViewOpen,
     onClose: onViewClose,
   } = useDisclosure();
+
+  // Function to load options asynchronously
+  const loadOptions = async (inputValue: string) => {
+    if (!inputValue) return [];
+
+    try {
+      const data = await suggestVendor({ params: { search: inputValue } });
+      // Assuming data is an array of vendor objects like { name: "Vendor A", id: "1" }
+
+      setOptions(data); // Set options in state
+      return data;
+    } catch (error) {
+      console.error("Error fetching vendor options:", error);
+      return [];
+    }
+  };
+
+  // Handle when a vendor is selected
+  const handleSelect = (selectedOption: { label: string; value: string }) => {
+    setSelectedVendor(selectedOption); // Update the selected vendor in state
+  };
 
   const columns = [
     {
@@ -220,6 +239,7 @@ function AssignedPanel() {
     try {
       const data = await getAllAssignedCandidates({
         page: currentPage,
+        ...(selectedVendor && { vendorId: selectedVendor.value }),
       });
 
       setAssignedSubmissions(data.results);
@@ -234,7 +254,7 @@ function AssignedPanel() {
 
   useEffect(() => {
     fecthApprovedSubmissions();
-  }, [currentPage]);
+  }, [currentPage, selectedVendor]);
 
   return (
     <MainLayout
@@ -243,6 +263,17 @@ function AssignedPanel() {
       path={["Dashboard", "Submissions", "Assigned"]}
     >
       <Box mt="2rem">
+        <Box width={{ sm: "100%", md: "50%" }} mb="4">
+          <AsyncSelect
+            cacheOptions
+            isClearable
+            loadOptions={loadOptions}
+            onChange={handleSelect}
+            value={selectedVendor} // Bind selected vendor value
+            placeholder="Search for vendors..."
+            defaultOptions={options} // Display options if available
+          />
+        </Box>
         <PaginationComponent
           total={total}
           currentPage={currentPage}

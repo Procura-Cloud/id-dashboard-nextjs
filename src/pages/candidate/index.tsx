@@ -90,8 +90,8 @@ export default function CandidatePage() {
                 Background: Plain white or ListItemght-coloured background.
               </ListItem>
               <ListItem>
-                ListItemghting: Ensure your face is clearly visible with no
-                shadows or glare.
+                Lighting: Ensure your face is clearly visible with no shadows or
+                glare.
               </ListItem>
               <ListItem>
                 Framing:
@@ -112,7 +112,7 @@ export default function CandidatePage() {
               <ListItem>
                 Expression: Neutral or friendly expression. Avoid sunglasses,
                 hats, or anything that obstructs your face unless required for
-                ListItemgious or medical reasons.
+                religious or medical reasons.
               </ListItem>
             </OrderedList>
           </div>

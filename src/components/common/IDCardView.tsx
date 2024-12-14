@@ -160,6 +160,9 @@ export default function IDCardView({
   const [employeeID, setEmployeeID] = useState("");
   const router = useRouter();
 
+  // Form Data
+  const [name, setName] = useState<string>(data.name);
+
   // Convert remote URL to File
   const convertToFile = async (photoUrl: string): Promise<File | null> => {
     if (!photoUrl) return null;
@@ -244,13 +247,17 @@ export default function IDCardView({
           )}
         </Box>
         <VStack spacing={6}>
-          <FormControl isReadOnly>
+          <FormControl isReadOnly={data.type === "NEW_APPLICATION"}>
             <FormLabel>Name</FormLabel>
-            <Input placeholder="Name" value={data.name} />
+            <Input
+              placeholder="Name"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+            />
           </FormControl>
 
           {data.type === "LOST_AND_FOUND" && (
-            <FormControl>
+            <FormControl isRequired>
               <FormLabel>Employee ID</FormLabel>
               <Input
                 placeholder="Employee ID"

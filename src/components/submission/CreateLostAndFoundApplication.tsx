@@ -14,14 +14,12 @@ import {
   Input,
   FormErrorMessage,
   VStack,
-  ButtonGroup,
 } from "@chakra-ui/react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "react-toastify";
 import { Controller, useForm } from "react-hook-form";
-import { hrSchema, HRType } from "@/schema/hr.schema";
 import AsyncSelect from "react-select/async";
-import { candidateSchema, CandidateType } from "@/schema/candidate.schema";
+import { CandidateType, lostAndFoundSchema } from "@/schema/candidate.schema";
 import {
   createCandidate,
   updateCandidate,
@@ -29,7 +27,7 @@ import {
 import { suggestLocations } from "@/controllers/location.controller";
 import { useEffect } from "react";
 
-export interface AddCandidateModalProps {
+export interface CreateLostAndFoundPropsProps {
   mode: "create" | "edit";
   title?: string;
   data?: CandidateType;
@@ -39,14 +37,14 @@ export interface AddCandidateModalProps {
   refresh?: () => Promise<void>;
 }
 
-export default function AddCandidateModal({
+export default function CreateLostAndFoundProps({
   mode = "create",
   title = "Create New Application",
   isOpen,
   data = {},
   onClose,
   refresh = async () => {},
-}: AddCandidateModalProps) {
+}: CreateLostAndFoundPropsProps) {
   const {
     register,
     control,
@@ -54,7 +52,8 @@ export default function AddCandidateModal({
     handleSubmit,
     formState: { errors, isSubmitting, isValid },
   } = useForm<CandidateType>({
-    resolver: zodResolver(candidateSchema),
+    resolver: zodResolver(lostAndFoundSchema),
+    mode: "onBlur",
   });
 
   const loadOptions = async (inputValue) => {
@@ -91,12 +90,12 @@ export default function AddCandidateModal({
       }
 
       if (mode === "edit") {
-        console.log("Candidate Data", data);
+        console.log(data);
         const response = await updateCandidate(data.id, {
           name: data.name,
           email: data.email,
           employeeID: data.employeeID,
-          locationID: data.location && data.location.value,
+          locationID: data.location.value,
         });
 
         toast.success("Candidate updated successfully.", {

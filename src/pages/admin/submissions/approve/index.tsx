@@ -129,10 +129,12 @@ export function AdminArrpovalPage() {
               onClick={() => {
                 setSelectedIdCard({
                   ...row.original,
-                  location: {
-                    label: row.original.location.slug,
-                    value: row.original.location.id,
-                  },
+                  ...(row.original.location && {
+                    location: {
+                      label: row.original.location.slug,
+                      value: row.original.location.id,
+                    },
+                  }),
                 });
                 onEditOpen();
               }}

@@ -1,26 +1,11 @@
-import { createAdmin } from "@/controllers/admin.controller";
-import { adminSchema, AdminType } from "@/schema/admin.schema";
 import {
   Modal,
   ModalOverlay,
   ModalContent,
   ModalHeader,
-  ModalFooter,
   ModalBody,
   ModalCloseButton,
-  Button,
-  FormControl,
-  FormLabel,
-  Input,
-  FormErrorMessage,
-  VStack,
-  ButtonGroup,
 } from "@chakra-ui/react";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { toast } from "react-toastify";
-import { useForm } from "react-hook-form";
-import { PDFViewer } from "@react-pdf/renderer";
-import { MyDocument } from "@/template/IDCard";
 
 export interface ViewModalProps {
   data: any;
@@ -29,7 +14,6 @@ export interface ViewModalProps {
 }
 
 export default function ViewModal({ data, isOpen, onClose }: ViewModalProps) {
-  console.log("Data", data);
   return (
     <Modal isOpen={isOpen} onClose={onClose}>
       <ModalOverlay />
