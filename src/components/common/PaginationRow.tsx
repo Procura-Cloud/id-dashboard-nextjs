@@ -19,7 +19,8 @@ export default function PaginationComponent(props: PaginationProps) {
       mb="2"
     >
       <Text>
-        Showing {currentPage} of {total} submissions
+        Showing {(currentPage - 1) * 10 + 1} -{" "}
+        {Math.min(currentPage * 10, total)} of {total} submissions
       </Text>
       <Box>
         <IconButton

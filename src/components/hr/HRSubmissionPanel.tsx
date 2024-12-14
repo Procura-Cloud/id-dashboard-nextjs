@@ -220,6 +220,7 @@ export function SubmissionCard({
 
       <AddCandidateModal
         mode="edit"
+        title="Edit Candidate"
         data={{
           id,
           name,
