@@ -14,12 +14,15 @@ import {
   Input,
   FormErrorMessage,
   VStack,
+  Select,
 } from "@chakra-ui/react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "react-toastify";
 import { useForm } from "react-hook-form";
 import { vendorSchema, VendorType } from "@/schema/vendor.schema";
 import { createVendor, updateVendor } from "@/controllers/vendor.controller";
+import { stateData } from "@/constants/countries";
+import { useMemo } from "react";
 
 export interface CreateVendorModalProps {
   mode: "create" | "edit";
@@ -40,6 +43,7 @@ export default function CreateVendorModal({
     register,
     handleSubmit,
     reset,
+    watch,
     formState: { errors, isSubmitting, isValid },
   } = useForm<VendorType>({
     defaultValues: {
@@ -53,6 +57,14 @@ export default function CreateVendorModal({
     mode: "onChange",
     resolver: zodResolver(vendorSchema),
   });
+
+  const state = watch("state");
+
+  const cities = useMemo(() => {
+    const cityData = stateData[state];
+
+    return cityData ? cityData : [];
+  }, [state]);
 
   const onSubmit = async (data: VendorType) => {
     try {
@@ -137,14 +149,28 @@ export default function CreateVendorModal({
 
               <FormControl isInvalid={!!errors.state}>
                 <FormLabel>State</FormLabel>
-                <Input placeholder="State" {...register("state")} />
+                <Select {...register("state")}>
+                  <option value=""> Select a state</option>
+                  {Object.keys(stateData).map((state) => (
+                    <option key={state} value={state}>
+                      {state}
+                    </option>
+                  ))}
+                </Select>
                 {errors.state && (
                   <FormErrorMessage>{errors.state.message}</FormErrorMessage>
                 )}
               </FormControl>
               <FormControl isInvalid={!!errors.city}>
                 <FormLabel>City</FormLabel>
-                <Input placeholder="City" {...register("city")} />
+                <Select {...register("city")}>
+                  <option value=""> Select a city</option>
+                  {cities.map((city) => (
+                    <option key={city} value={city}>
+                      {city}
+                    </option>
+                  ))}
+                </Select>
                 {errors.city && (
                   <FormErrorMessage>{errors.city.message}</FormErrorMessage>
                 )}
