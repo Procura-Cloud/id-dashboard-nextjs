@@ -19,7 +19,6 @@ import {
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "react-toastify";
 import { Controller, useForm } from "react-hook-form";
-import { hrSchema, HRType } from "@/schema/hr.schema";
 import AsyncSelect from "react-select/async";
 import { candidateSchema, CandidateType } from "@/schema/candidate.schema";
 import {

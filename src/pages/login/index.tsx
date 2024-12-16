@@ -69,9 +69,9 @@ export default function Login() {
         });
       }
       console.error(error);
+    } finally {
+      setIsLoading(false);
     }
-
-    setIsLoading(false);
   };
 
   useEffect(() => {
@@ -133,7 +133,7 @@ export default function Login() {
                       size="lg"
                       width="full"
                       _hover={{ bg: "teal.600" }}
-                      isLoading={authLoading}
+                      isLoading={isLoading}
                     >
                       Send Magic Link
                     </Button>

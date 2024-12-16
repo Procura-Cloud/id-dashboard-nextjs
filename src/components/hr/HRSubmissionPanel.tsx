@@ -16,6 +16,7 @@ import {
   HStack,
   Tag,
   Input,
+  Tooltip,
 } from "@chakra-ui/react";
 import { useQueryState } from "nuqs";
 import { use, useDeferredValue, useEffect, useState } from "react";
@@ -52,6 +53,7 @@ export function SubmissionCard({
   location?: {
     value: string;
     label: string;
+    preFormattedAddress?: string;
   };
   status: string;
   stage: string;
@@ -145,7 +147,12 @@ export function SubmissionCard({
 
           <Text mt="2">Employee ID: {employeeID}</Text>
           <Text>Email: {email}</Text>
-          <Text>Location: {location?.label ?? "-"}</Text>
+          <Text>
+            Location:
+            <Tooltip label={location?.preFormattedAddress ?? ""}>
+              {location?.label ?? "-"}
+            </Tooltip>
+          </Text>
           <Text>
             Status:
             <Tag ml="2" color="teal" colorScheme="teal">

@@ -209,6 +209,8 @@ function AdminSubmissionsPage() {
                   submission.location && {
                     value: submission.location.id,
                     label: submission.location.slug,
+                    preFormattedAddress:
+                      submission.location.preFormattedAddress,
                   }
                 }
                 refresh={fetchSubmissions}
