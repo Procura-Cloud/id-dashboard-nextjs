@@ -88,7 +88,7 @@ export default function Login() {
           break;
         }
         case "VENDOR": {
-          router.push("/vendor/submissions");
+          router.push("/vendor/submissions/assigned");
           break;
         }
       }
