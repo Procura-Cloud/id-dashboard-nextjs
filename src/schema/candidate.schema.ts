@@ -50,8 +50,7 @@ export const lostAndFoundSchema = z.object({
       id: z.string().optional().nullable(),
       slug: z.string().optional().nullable(),
     })
-    .nullable()
-    .optional(),
+    .required(),
 });
 
 export type LostAndFoundType = z.infer<typeof lostAndFoundSchema>;

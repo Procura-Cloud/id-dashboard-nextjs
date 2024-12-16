@@ -25,7 +25,7 @@ import {
   updateCandidate,
 } from "@/controllers/candidate.controller";
 import { suggestLocations } from "@/controllers/location.controller";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 
 export interface CreateLostAndFoundPropsProps {
   mode: "create" | "edit";
@@ -55,6 +55,10 @@ export default function CreateLostAndFoundProps({
     resolver: zodResolver(lostAndFoundSchema),
     mode: "onBlur",
   });
+
+  const [defaultLocations, setDefaultLocations] = useState<
+    { value: string; label: string }[]
+  >([]);
 
   const loadOptions = async (inputValue) => {
     if (!inputValue) return [];
@@ -117,6 +121,12 @@ export default function CreateLostAndFoundProps({
   };
 
   useEffect(() => {
+    suggestLocations().then((response) => {
+      setDefaultLocations(response);
+    });
+  }, []);
+
+  useEffect(() => {
     reset({
       id: data.id,
       type: data.type,
@@ -150,7 +160,7 @@ export default function CreateLostAndFoundProps({
                   <FormErrorMessage>{errors.email.message}</FormErrorMessage>
                 )}
               </FormControl>
-              <FormControl isInvalid={!!errors.employeeID}>
+              <FormControl isRequired isInvalid={!!errors.employeeID}>
                 <FormLabel>Employee ID</FormLabel>
                 <Input
                   placeholder="Candidate Employee ID"
@@ -162,7 +172,7 @@ export default function CreateLostAndFoundProps({
                   </FormErrorMessage>
                 )}
               </FormControl>
-              <FormControl>
+              <FormControl isRequired>
                 <FormLabel>Location</FormLabel>
                 <Controller
                   name="location"
@@ -171,6 +181,7 @@ export default function CreateLostAndFoundProps({
                     <AsyncSelect
                       {...field} // Spread the field object for value and onChange handling
                       cacheOptions
+                      defaultOptions={defaultLocations}
                       loadOptions={loadOptions}
                       onChange={field.onChange}
                       placeholder="Search items..."

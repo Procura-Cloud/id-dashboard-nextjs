@@ -26,7 +26,7 @@ import {
   updateCandidate,
 } from "@/controllers/candidate.controller";
 import { suggestLocations } from "@/controllers/location.controller";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 
 export interface AddCandidateModalProps {
   mode: "create" | "edit";
@@ -55,6 +55,10 @@ export default function AddCandidateModal({
   } = useForm<CandidateType>({
     resolver: zodResolver(candidateSchema),
   });
+
+  const [defaultLocations, setDefaultLocations] = useState<
+    { label: string; value: string }[]
+  >([]);
 
   const loadOptions = async (inputValue) => {
     if (!inputValue) return [];
@@ -117,6 +121,12 @@ export default function AddCandidateModal({
   };
 
   useEffect(() => {
+    suggestLocations().then((locations) => {
+      setDefaultLocations(locations);
+    });
+  }, []);
+
+  useEffect(() => {
     reset({
       id: data.id,
       type: data.type,
@@ -162,7 +172,7 @@ export default function AddCandidateModal({
                   </FormErrorMessage>
                 )}
               </FormControl>
-              <FormControl>
+              <FormControl isRequired>
                 <FormLabel>Location</FormLabel>
                 <Controller
                   name="location"
@@ -171,6 +181,7 @@ export default function AddCandidateModal({
                     <AsyncSelect
                       {...field} // Spread the field object for value and onChange handling
                       cacheOptions
+                      defaultOptions={defaultLocations}
                       loadOptions={loadOptions}
                       onChange={field.onChange}
                       placeholder="Search items..."

@@ -55,6 +55,14 @@ function AdminSubmissionsPage() {
   const [total, setTotal] = useState(0);
   const { currentPage, prevPage, nextPage } = usePagination(submissions.length);
 
+  // Options
+  const [defaultLocations, setDefaultLocations] = useState<
+    {
+      label: string;
+      value: string;
+    }[]
+  >([]);
+
   const { user } = useAuth();
 
   const defferedSearch = useDeferredValue(search);
@@ -100,6 +108,12 @@ function AdminSubmissionsPage() {
       });
     }
   };
+
+  useEffect(() => {
+    suggestLocations().then((locations) => {
+      setDefaultLocations(locations);
+    });
+  }, []);
 
   useEffect(() => {
     fetchSubmissions();
@@ -173,6 +187,7 @@ function AdminSubmissionsPage() {
             <AsyncSelect
               cacheOptions
               isClearable
+              defaultOptions={defaultLocations} // Display options if available
               value={location} // Ensure the correct value is displayed
               loadOptions={loadOptions}
               onChange={(e) => setLocation(e)}
