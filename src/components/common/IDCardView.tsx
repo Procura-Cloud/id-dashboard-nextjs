@@ -9,8 +9,6 @@ import "cropperjs/dist/cropper.css";
 export interface IDCardViewProps {
   data: CandidateType;
 }
-import { createAdmin } from "@/controllers/admin.controller";
-import { adminSchema, AdminType } from "@/schema/admin.schema";
 import {
   Modal,
   ModalOverlay,

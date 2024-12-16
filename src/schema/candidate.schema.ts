@@ -54,3 +54,22 @@ export const lostAndFoundSchema = z.object({
 });
 
 export type LostAndFoundType = z.infer<typeof lostAndFoundSchema>;
+
+export const newApplicationSchema = z.object({
+  id: z.number(),
+  name: z.string().min(1, "Name is required."),
+  location: z.string(),
+});
+
+export type NewApplicationType = z.infer<typeof newApplicationSchema>;
+
+export const newApplicationLostAndFoundSchema = z.object({
+  id: z.number(),
+  name: z.string().min(1, "Name is required."),
+  location: z.string(),
+  employeeID: z.string().min(1, "Employee ID is required."),
+});
+
+export type NewApplicationLostAndFoundType = z.infer<
+  typeof newApplicationLostAndFoundSchema
+>;

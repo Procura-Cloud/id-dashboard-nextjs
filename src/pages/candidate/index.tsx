@@ -1,3 +1,5 @@
+import LostAndFoundForm from "@/components/candidate/LostAndFoundForm";
+import NewApplicationForm from "@/components/candidate/NewApplicationForm";
 import IDCardView from "@/components/common/IDCardView";
 import { useAuth } from "@/context/AuthContext";
 import {
@@ -56,6 +58,8 @@ export default function CandidatePage() {
   useEffect(() => {
     verifyToken();
   }, [router.query]); // Add dependency to ensure it re-runs when `token` is available
+
+  if (!router.isReady) return null;
 
   return (
     <Box
@@ -118,8 +122,15 @@ export default function CandidatePage() {
           </div>
         </Alert>
 
-        {router.isReady && (
-          <IDCardView data={data} token={router.query.token as string} />
+        {data.type === "NEW_APPLICATION" && (
+          <NewApplicationForm
+            data={data}
+            token={router.query.token as string}
+          />
+        )}
+
+        {data.type === "LOST_AND_FOUND" && (
+          <LostAndFoundForm data={data} token={router.query.token as string} />
         )}
       </Box>
     </Box>
