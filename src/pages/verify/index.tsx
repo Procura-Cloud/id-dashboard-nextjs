@@ -34,7 +34,7 @@ export default function VerifyPage() {
       }
     }
     login(token);
-  }, [router.query]); // Add dependency to ensure it re-runs when `token` is available
+  }, [router.query, user, isLoading]); // Add dependency to ensure it re-runs when `token` is available
 
   return (
     <Box
