@@ -196,7 +196,7 @@ function VendorAssignedPage() {
   const fecthApprovedSubmissions = async () => {
     try {
       const data = await getAssignedCandidates({
-        locationId: selectedLocation?.value,
+        locationID: selectedLocation?.value,
       });
       setAssignedSubmissions(data);
     } catch (error) {
@@ -277,10 +277,11 @@ function VendorAssignedPage() {
         <HStack mt="2">
           <AsyncSelect
             styles={{ container: (base) => ({ ...base, width: "100%" }) }}
+            isClearable
             defaultOptions={defaultLocations}
             cacheOptions
             loadOptions={loadOptions}
-            onChange={(e) => setLocation(e.value)}
+            onChange={(e) => setLocation(e)}
             placeholder="Search items..."
           />
         </HStack>
