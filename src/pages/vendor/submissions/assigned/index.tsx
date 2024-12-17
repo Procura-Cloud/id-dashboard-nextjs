@@ -24,6 +24,7 @@ import {
   Heading,
   Text,
   Spinner,
+  Select,
 } from "@chakra-ui/react";
 import { toast } from "react-toastify";
 import { ChevronDownIcon } from "@chakra-ui/icons";
@@ -46,7 +47,9 @@ import MainLayout from "@/components/layouts/MainLayout";
 import { getAllAssignedCandidates } from "@/controllers/candidate.controller";
 import { IoIosSend } from "react-icons/io";
 import { useRouter } from "next/router";
+import AsyncSelect from "react-select/async";
 import withProtection from "@/components/common/ProtectedRoute";
+import { suggestLocations } from "@/controllers/location.controller";
 
 function VendorAssignedPage() {
   const [assignedSubmissions, setAssignedSubmissions] = useState([]);
@@ -57,6 +60,9 @@ function VendorAssignedPage() {
   const [selectedIdCard, setSelectedIdCard] = useState(null);
 
   const { isOpen, onOpen, onClose } = useDisclosure();
+
+  const [selectedLocation, setLocation] = useState(null);
+  const [defaultLocations, setDefaultLocations] = useState([]);
 
   const {
     isOpen: isSendToVendorOpen,
@@ -131,6 +137,22 @@ function VendorAssignedPage() {
     },
   ];
 
+  const loadOptions = async (inputValue) => {
+    if (!inputValue) return [];
+    try {
+      const data = await suggestLocations({
+        params: {
+          search: inputValue,
+        },
+      });
+
+      return data;
+    } catch (error) {
+      console.error("Error fetching items:", error);
+      return [];
+    }
+  };
+
   const handleSendToVendor = async () => {
     console.log("Selected:", selectedRows);
   };
@@ -162,17 +184,20 @@ function VendorAssignedPage() {
     setSelectedRowIds(newSelection);
   };
 
-  const selectedRows = Object.keys(selectedRowIds).map(
-    (rowId) => assignedSubmissions[rowId]
-  );
+  const selectedRows =
+    Object.keys(selectedRowIds || {}).map(
+      (rowId) => assignedSubmissions?.[rowId]
+    ) ?? [];
 
-  const selectedRowCount = Object.keys(selectedRowIds).filter(
-    (rowId) => selectedRowIds[rowId]
-  ).length;
+  const selectedRowCount =
+    Object.keys(selectedRowIds).filter((rowId) => selectedRowIds[rowId])
+      .length ?? 0;
 
   const fecthApprovedSubmissions = async () => {
     try {
-      const data = await getAssignedCandidates();
+      const data = await getAssignedCandidates({
+        locationId: selectedLocation?.value,
+      });
       setAssignedSubmissions(data);
     } catch (error) {
       console.error(error);
@@ -181,6 +206,12 @@ function VendorAssignedPage() {
       });
     }
   };
+
+  useEffect(() => {
+    suggestLocations().then((response) => {
+      setDefaultLocations(response);
+    });
+  }, []);
 
   useEffect(() => {
     fecthApprovedSubmissions();
@@ -195,6 +226,11 @@ function VendorAssignedPage() {
       clearInterval(intervalId);
     };
   }, []);
+
+  useEffect(() => {
+    fecthApprovedSubmissions();
+  }, [selectedLocation]);
+
   return (
     <MainLayout
       title="Assigned"
@@ -238,6 +274,17 @@ function VendorAssignedPage() {
             Download Submissions
           </Button>
         </HStack>
+        <HStack mt="2">
+          <AsyncSelect
+            styles={{ container: (base) => ({ ...base, width: "100%" }) }}
+            defaultOptions={defaultLocations}
+            cacheOptions
+            loadOptions={loadOptions}
+            onChange={(e) => setLocation(e.value)}
+            placeholder="Search items..."
+          />
+        </HStack>
+
         <Table marginTop="4rem">
           <Thead bg="gray.100" borderBottom="solid 1px" borderColor="gray.500">
             <Tr>
@@ -290,13 +337,17 @@ function VendorAssignedPage() {
           <ViewModal data={selectedIdCard} isOpen={isOpen} onClose={onClose} />
         )}
 
-        <SendToVendorModal
-          mode="create"
-          applications={selectedRows.map((row) => row.id)}
-          isOpen={isSendToVendorOpen}
-          onClose={onSendToVendorClose}
-          refresh={fecthApprovedSubmissions}
-        />
+        {selectedRows.length > 0 && (
+          <SendToVendorModal
+            mode="create"
+            applications={selectedRows
+              .filter((row) => row) // Remove undefined rows
+              .map((row) => row.id)}
+            isOpen={isSendToVendorOpen}
+            onClose={onSendToVendorClose}
+            refresh={fecthApprovedSubmissions}
+          />
+        )}
 
         {selectedIdCard && (
           <ViewModal

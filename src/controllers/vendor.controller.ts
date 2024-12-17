@@ -32,8 +32,10 @@ export const listVendors = async (options = {}) => {
   return response.data;
 };
 
-export const getAssignedCandidates = async () => {
-  const response = await axiosClient.get(`/vendor/assigned-candidates`);
+export const getAssignedCandidates = async (params = {}) => {
+  const response = await axiosClient.get(`/vendor/assigned-candidates`, {
+    params: params,
+  });
 
   return response.data;
 };
