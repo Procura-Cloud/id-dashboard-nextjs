@@ -48,6 +48,8 @@ import { getAllAssignedCandidates } from "@/controllers/candidate.controller";
 import { IoIosSend } from "react-icons/io";
 import { useRouter } from "next/router";
 import withProtection from "@/components/common/ProtectedRoute";
+import { suggestLocations } from "@/controllers/location.controller";
+import AsyncSelect from "react-select/async";
 
 function CompletedSubmissionsPage() {
   const [assignedSubmissions, setAssignedSubmissions] = useState([]);
@@ -56,6 +58,8 @@ function CompletedSubmissionsPage() {
   const router = useRouter();
 
   const [selectedIdCard, setSelectedIdCard] = useState(null);
+  const [selectedLocation, setLocation] = useState(null);
+  const [defaultLocations, setDefaultLocations] = useState([]);
 
   const { isOpen, onOpen, onClose } = useDisclosure();
 
@@ -113,6 +117,22 @@ function CompletedSubmissionsPage() {
     },
   ];
 
+  const loadOptions = async (inputValue) => {
+    if (!inputValue) return [];
+    try {
+      const data = await suggestLocations({
+        params: {
+          search: inputValue,
+        },
+      });
+
+      return data;
+    } catch (error) {
+      console.error("Error fetching items:", error);
+      return [];
+    }
+  };
+
   const handleSendToVendor = async () => {
     console.log("Selected:", selectedRows);
   };
@@ -154,7 +174,9 @@ function CompletedSubmissionsPage() {
 
   const fecthApprovedSubmissions = async () => {
     try {
-      const data = await getAssignedCompletedSubmissions();
+      const data = await getAssignedCompletedSubmissions({
+        locationID: selectedLocation?.value,
+      });
       setAssignedSubmissions(data);
     } catch (error) {
       console.error(error);
@@ -163,6 +185,12 @@ function CompletedSubmissionsPage() {
       });
     }
   };
+
+  useEffect(() => {
+    suggestLocations().then((response) => {
+      setDefaultLocations(response);
+    });
+  }, []);
 
   useEffect(() => {
     fecthApprovedSubmissions();
@@ -176,14 +204,26 @@ function CompletedSubmissionsPage() {
     return () => {
       clearInterval(intervalId);
     };
-  }, []);
+  }, [selectedLocation]);
   return (
     <MainLayout
-      title="Assigned"
-      content="View assinged submissions."
-      path={["Vendor", "Submissions", "Assigned"]}
+      title="Completed"
+      content="View completed submissions here."
+      path={["Vendor", "Submissions", "Completed"]}
     >
       <Box>
+        <HStack mt="2">
+          <AsyncSelect
+            styles={{ container: (base) => ({ ...base, width: "100%" }) }}
+            isClearable
+            defaultOptions={defaultLocations}
+            cacheOptions
+            loadOptions={loadOptions}
+            onChange={(e) => setLocation(e)}
+            placeholder="Search items..."
+          />
+        </HStack>
+
         <Table marginTop="4rem">
           <Thead bg="gray.100" borderBottom="solid 1px" borderColor="gray.500">
             <Tr>

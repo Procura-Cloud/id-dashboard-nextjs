@@ -40,9 +40,10 @@ export const getAssignedCandidates = async (params = {}) => {
   return response.data;
 };
 
-export const getAssignedCompletedSubmissions = async () => {
+export const getAssignedCompletedSubmissions = async (params = {}) => {
   const response = await axiosClient.get(
-    `/vendor/assigned-completed-submissions`
+    `/vendor/assigned-completed-submissions`,
+    { params: params }
   );
 
   return response.data;
