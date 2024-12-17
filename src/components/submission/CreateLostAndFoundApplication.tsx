@@ -160,7 +160,7 @@ export default function CreateLostAndFoundProps({
                   <FormErrorMessage>{errors.email.message}</FormErrorMessage>
                 )}
               </FormControl>
-              <FormControl isRequired isInvalid={!!errors.employeeID}>
+              <FormControl isInvalid={!!errors.employeeID}>
                 <FormLabel>Employee ID</FormLabel>
                 <Input
                   placeholder="Candidate Employee ID"
