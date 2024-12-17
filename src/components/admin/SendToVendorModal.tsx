@@ -15,7 +15,7 @@ import { toast } from "react-toastify";
 import AsyncSelect from "react-select/async";
 import { sendToVendor } from "@/controllers/candidate.controller";
 import { suggestVendor } from "@/controllers/vendor.controller";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 export interface SendToVendorModalProps {
   mode: "create" | "edit";
@@ -39,6 +39,10 @@ export default function SendToVendorModal({
     []
   );
 
+  const [defaultVendors, setDefaultVendors] = useState<
+    { label: string; value: string }[]
+  >([]);
+
   // Function to load options asynchronously
   const loadOptions = async (inputValue: string) => {
     if (!inputValue) return [];
@@ -60,6 +64,12 @@ export default function SendToVendorModal({
     setSelectedVendor(selectedOption); // Update the selected vendor in state
   };
 
+  useEffect(() => {
+    suggestVendor().then((vendors) => {
+      setDefaultVendors(vendors);
+    });
+  }, []);
+
   return (
     <Modal isOpen={isOpen} onClose={onClose}>
       <ModalOverlay />
@@ -76,11 +86,11 @@ export default function SendToVendorModal({
               {/* AsyncSelect for vendor selection */}
               <AsyncSelect
                 cacheOptions
+                defaultOptions={defaultVendors} // Display options if available
                 loadOptions={loadOptions}
                 onChange={handleSelect}
                 value={selectedVendor} // Bind selected vendor value
                 placeholder="Search for vendors..."
-                defaultOptions={options} // Display options if available
               />
             </FormControl>
           </VStack>

@@ -93,7 +93,7 @@ export default function Login() {
         }
       }
     }
-  }, [user]);
+  }, [user, authLoading]);
 
   return (
     <Center minH="100vh" bgGradient="linear(to-br, teal.500, blue.500)">
